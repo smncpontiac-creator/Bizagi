@@ -217,4 +217,330 @@
   <!-- Proceso Ventas (vacío pero referenciado) -->
   <bpmn:process id="Process_Ventas" name="Ventas"/>
 
+  <!-- ============================================ -->
+  <!-- DIAGRAMA VISUAL CON COORDENADAS             -->
+  <!-- ============================================ -->
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_BuzinesLean">
+
+      <!-- POOLS DE PARTICIPANTES -->
+
+      <!-- Pool Cliente -->
+      <bpmndi:BPMNShape id="Shape_Participant_Cliente" bpmnElement="Participant_Cliente" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1800" height="350"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Pool Ventas -->
+      <bpmndi:BPMNShape id="Shape_Participant_Ventas" bpmnElement="Participant_Ventas" isHorizontal="true">
+        <dc:Bounds x="160" y="450" width="1800" height="120"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Pool Administración -->
+      <bpmndi:BPMNShape id="Shape_Participant_Admin" bpmnElement="Participant_Admin" isHorizontal="true">
+        <dc:Bounds x="160" y="590" width="1800" height="250"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Pool Diseño y Bordado -->
+      <bpmndi:BPMNShape id="Shape_Participant_Diseno" bpmnElement="Participant_Diseno" isHorizontal="true">
+        <dc:Bounds x="160" y="860" width="1800" height="250"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Pool Producción -->
+      <bpmndi:BPMNShape id="Shape_Participant_Produccion" bpmnElement="Participant_Produccion" isHorizontal="true">
+        <dc:Bounds x="160" y="1130" width="1800" height="350"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Pool Bodega y Logística -->
+      <bpmndi:BPMNShape id="Shape_Participant_Bodega" bpmnElement="Participant_Bodega" isHorizontal="true">
+        <dc:Bounds x="160" y="1500" width="1800" height="450"/>
+      </bpmndi:BPMNShape>
+
+      <!-- ============================================ -->
+      <!-- PROCESO CLIENTE - ELEMENTOS                  -->
+      <!-- ============================================ -->
+
+      <!-- Start Event -->
+      <bpmndi:BPMNShape id="Shape_Start_SolicitudPedido" bpmnElement="Start_SolicitudPedido">
+        <dc:Bounds x="250" y="220" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="230" y="263" width="80" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Recibir Cotización -->
+      <bpmndi:BPMNShape id="Shape_Task_RecibirCotizacion" bpmnElement="Task_RecibirCotizacion">
+        <dc:Bounds x="350" y="198" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Aprobar Diseño -->
+      <bpmndi:BPMNShape id="Shape_Task_AprobarDiseno" bpmnElement="Task_AprobarDiseno">
+        <dc:Bounds x="530" y="198" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Pago Inicial -->
+      <bpmndi:BPMNShape id="Shape_Task_PagoInicial" bpmnElement="Task_PagoInicial">
+        <dc:Bounds x="710" y="198" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Aprobar Muestra -->
+      <bpmndi:BPMNShape id="Shape_Task_AprobarMuestra" bpmnElement="Task_AprobarMuestra">
+        <dc:Bounds x="890" y="198" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Pago Final -->
+      <bpmndi:BPMNShape id="Shape_Task_PagoFinal" bpmnElement="Task_PagoFinal">
+        <dc:Bounds x="1070" y="198" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Recibir Producto -->
+      <bpmndi:BPMNShape id="Shape_Task_RecibirProducto" bpmnElement="Task_RecibirProducto">
+        <dc:Bounds x="1250" y="198" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- End Event -->
+      <bpmndi:BPMNShape id="Shape_End_ClienteSatisfecho" bpmnElement="End_ClienteSatisfecho">
+        <dc:Bounds x="1430" y="220" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1420" y="263" width="58" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 1 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda1" bpmnElement="Annotation_Muda1">
+        <dc:Bounds x="480" y="310" width="220" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 2 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda2" bpmnElement="Annotation_Muda2">
+        <dc:Bounds x="820" y="310" width="250" height="90"/>
+      </bpmndi:BPMNShape>
+
+      <!-- ============================================ -->
+      <!-- PROCESO ADMINISTRACIÓN - ELEMENTOS           -->
+      <!-- ============================================ -->
+
+      <!-- Task: Ingresar ERP -->
+      <bpmndi:BPMNShape id="Shape_Task_IngresarERPDtemite" bpmnElement="Task_IngresarERPDtemite">
+        <dc:Bounds x="350" y="650" width="150" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 12 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda12" bpmnElement="Annotation_Muda12">
+        <dc:Bounds x="315" y="750" width="220" height="70"/>
+      </bpmndi:BPMNShape>
+
+      <!-- ============================================ -->
+      <!-- PROCESO DISEÑO - ELEMENTOS                   -->
+      <!-- ============================================ -->
+
+      <!-- Task: Desarrollar Diseño -->
+      <bpmndi:BPMNShape id="Shape_Task_DesarrollarDiseno" bpmnElement="Task_DesarrollarDiseno">
+        <dc:Bounds x="350" y="940" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 11 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda11" bpmnElement="Annotation_Muda11">
+        <dc:Bounds x="310" y="1040" width="220" height="60"/>
+      </bpmndi:BPMNShape>
+
+      <!-- ============================================ -->
+      <!-- PROCESO PRODUCCIÓN - ELEMENTOS               -->
+      <!-- ============================================ -->
+
+      <!-- Task: Elaborar Muestras -->
+      <bpmndi:BPMNShape id="Shape_Task_ElaborarMuestras" bpmnElement="Task_ElaborarMuestras">
+        <dc:Bounds x="350" y="1220" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Confeccionar -->
+      <bpmndi:BPMNShape id="Shape_Task_Confeccionar" bpmnElement="Task_Confeccionar">
+        <dc:Bounds x="550" y="1220" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Control Calidad -->
+      <bpmndi:BPMNShape id="Shape_Task_ControlCalidad" bpmnElement="Task_ControlCalidad">
+        <dc:Bounds x="750" y="1220" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 8 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda8" bpmnElement="Annotation_Muda8">
+        <dc:Bounds x="310" y="1330" width="220" height="70"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 9 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda9" bpmnElement="Annotation_Muda9">
+        <dc:Bounds x="500" y="1330" width="240" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 10 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda10" bpmnElement="Annotation_Muda10">
+        <dc:Bounds x="710" y="1330" width="220" height="70"/>
+      </bpmndi:BPMNShape>
+
+      <!-- ============================================ -->
+      <!-- PROCESO BODEGA - ELEMENTOS                   -->
+      <!-- ============================================ -->
+
+      <!-- Task: Buscar Materiales -->
+      <bpmndi:BPMNShape id="Shape_Task_BuscarMateriales" bpmnElement="Task_BuscarMateriales">
+        <dc:Bounds x="350" y="1600" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Transportar -->
+      <bpmndi:BPMNShape id="Shape_Task_TransporteBodegaCasaMatriz" bpmnElement="Task_TransporteBodegaCasaMatriz">
+        <dc:Bounds x="550" y="1600" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Control Inventario Manual -->
+      <bpmndi:BPMNShape id="Shape_Task_ControlInventarioManual" bpmnElement="Task_ControlInventarioManual">
+        <dc:Bounds x="750" y="1600" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Inventario Excesivo -->
+      <bpmndi:BPMNShape id="Shape_Task_InventarioExcesivo" bpmnElement="Task_InventarioExcesivo">
+        <dc:Bounds x="950" y="1600" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Task: Preparar Despacho -->
+      <bpmndi:BPMNShape id="Shape_Task_PrepararDespacho" bpmnElement="Task_PrepararDespacho">
+        <dc:Bounds x="1150" y="1600" width="140" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 3 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda3" bpmnElement="Annotation_Muda3">
+        <dc:Bounds x="300" y="1710" width="240" height="90"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 4 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda4" bpmnElement="Annotation_Muda4">
+        <dc:Bounds x="480" y="1710" width="280" height="90"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 5 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda5" bpmnElement="Annotation_Muda5">
+        <dc:Bounds x="690" y="1710" width="260" height="90"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 6 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda6" bpmnElement="Annotation_Muda6">
+        <dc:Bounds x="870" y="1710" width="300" height="100"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Anotación Muda 7 -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Muda7" bpmnElement="Annotation_Muda7">
+        <dc:Bounds x="1090" y="1710" width="260" height="70"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Leyenda Lean -->
+      <bpmndi:BPMNShape id="Shape_Annotation_Lean_Legend" bpmnElement="Annotation_Lean_Legend">
+        <dc:Bounds x="1600" y="1600" width="320" height="150"/>
+      </bpmndi:BPMNShape>
+
+      <!-- ============================================ -->
+      <!-- EDGES - FLUJOS DE SECUENCIA CLIENTE          -->
+      <!-- ============================================ -->
+
+      <bpmndi:BPMNEdge id="Edge_Flow_01" bpmnElement="Flow_01">
+        <di:waypoint x="286" y="238"/>
+        <di:waypoint x="350" y="238"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_02" bpmnElement="Flow_02">
+        <di:waypoint x="470" y="238"/>
+        <di:waypoint x="530" y="238"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_03" bpmnElement="Flow_03">
+        <di:waypoint x="650" y="238"/>
+        <di:waypoint x="710" y="238"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_04" bpmnElement="Flow_04">
+        <di:waypoint x="830" y="238"/>
+        <di:waypoint x="890" y="238"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_05" bpmnElement="Flow_05">
+        <di:waypoint x="1010" y="238"/>
+        <di:waypoint x="1070" y="238"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_06" bpmnElement="Flow_06">
+        <di:waypoint x="1190" y="238"/>
+        <di:waypoint x="1250" y="238"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_07" bpmnElement="Flow_07">
+        <di:waypoint x="1370" y="238"/>
+        <di:waypoint x="1430" y="238"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- ============================================ -->
+      <!-- EDGES - ASOCIACIONES DE ANOTACIONES          -->
+      <!-- ============================================ -->
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda1" bpmnElement="Association_Muda1">
+        <di:waypoint x="590" y="278"/>
+        <di:waypoint x="590" y="310"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda2" bpmnElement="Association_Muda2">
+        <di:waypoint x="950" y="278"/>
+        <di:waypoint x="945" y="310"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda12" bpmnElement="Association_Muda12">
+        <di:waypoint x="425" y="730"/>
+        <di:waypoint x="425" y="750"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda11" bpmnElement="Association_Muda11">
+        <di:waypoint x="420" y="1020"/>
+        <di:waypoint x="420" y="1040"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda8" bpmnElement="Association_Muda8">
+        <di:waypoint x="420" y="1300"/>
+        <di:waypoint x="420" y="1330"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda9" bpmnElement="Association_Muda9">
+        <di:waypoint x="620" y="1300"/>
+        <di:waypoint x="620" y="1330"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda10" bpmnElement="Association_Muda10">
+        <di:waypoint x="820" y="1300"/>
+        <di:waypoint x="820" y="1330"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda3" bpmnElement="Association_Muda3">
+        <di:waypoint x="420" y="1680"/>
+        <di:waypoint x="420" y="1710"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda4" bpmnElement="Association_Muda4">
+        <di:waypoint x="620" y="1680"/>
+        <di:waypoint x="620" y="1710"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda5" bpmnElement="Association_Muda5">
+        <di:waypoint x="820" y="1680"/>
+        <di:waypoint x="820" y="1710"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda6" bpmnElement="Association_Muda6">
+        <di:waypoint x="1020" y="1680"/>
+        <di:waypoint x="1020" y="1710"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Association_Muda7" bpmnElement="Association_Muda7">
+        <di:waypoint x="1220" y="1680"/>
+        <di:waypoint x="1220" y="1710"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
 </bpmn:definitions>
