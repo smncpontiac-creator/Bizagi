@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  id="Definitions_Buzines_Lean"
+  targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:collaboration id="Collaboration_BuzinesLean">
+    <bpmn:participant id="Participant_Cliente" name="CLIENTE" processRef="Process_Cliente"/>
+    <bpmn:participant id="Participant_Ventas" name="VENTAS" processRef="Process_Ventas"/>
+    <bpmn:participant id="Participant_Admin" name="ADMINISTRACIÓN" processRef="Process_Admin"/>
+    <bpmn:participant id="Participant_Diseno" name="DISEÑO Y BORDADO" processRef="Process_Diseno"/>
+    <bpmn:participant id="Participant_Produccion" name="PRODUCCIÓN" processRef="Process_Produccion"/>
+    <bpmn:participant id="Participant_Bodega" name="BODEGA Y LOGÍSTICA" processRef="Process_Bodega"/>
+
+    <!-- Anotaciones Lean -->
+    <bpmn:textAnnotation id="Annotation_Lean_Legend">
+      <bpmn:text>🔴 MUDA IDENTIFICADA (No agrega valor)
+🟡 OPORTUNIDAD DE MEJORA
+⏱️ ESPERA (Waiting)
+🚚 TRANSPORTE INNECESARIO
+🔄 REPROCESO POTENCIAL
+📦 INVENTARIO EXCESIVO
+🏃 MOVIMIENTO INNECESARIO</bpmn:text>
+    </bpmn:textAnnotation>
+  </bpmn:collaboration>
+
+  <!-- Proceso Cliente -->
+  <bpmn:process id="Process_Cliente" name="Cliente">
+    <bpmn:startEvent id="Start_SolicitudPedido" name="Enviar solicitud pedido">
+      <bpmn:outgoing>Flow_01</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:task id="Task_RecibirCotizacion" name="Recibir y revisar cotización">
+      <bpmn:incoming>Flow_01</bpmn:incoming>
+      <bpmn:outgoing>Flow_02</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Task_AprobarDiseno" name="Revisar y aprobar diseño propuesto">
+      <bpmn:incoming>Flow_02</bpmn:incoming>
+      <bpmn:outgoing>Flow_03</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Task_PagoInicial" name="Realizar pago inicial 50%">
+      <bpmn:incoming>Flow_03</bpmn:incoming>
+      <bpmn:outgoing>Flow_04</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Task_AprobarMuestra" name="Aprobar muestra física">
+      <bpmn:incoming>Flow_04</bpmn:incoming>
+      <bpmn:outgoing>Flow_05</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Task_PagoFinal" name="Realizar pago final 50%">
+      <bpmn:incoming>Flow_05</bpmn:incoming>
+      <bpmn:outgoing>Flow_06</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Task_RecibirProducto" name="Recibir producto y firmar conformidad">
+      <bpmn:incoming>Flow_06</bpmn:incoming>
+      <bpmn:outgoing>Flow_07</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:endEvent id="End_ClienteSatisfecho" name="Cliente satisfecho">
+      <bpmn:incoming>Flow_07</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Anotaciones del Proceso Cliente -->
+    <bpmn:textAnnotation id="Annotation_Muda1">
+      <bpmn:text>⏱️ ESPERA - Cliente toma 3-7 días en aprobar (sin criterios claros)
+🟡 MEJORA: Definir criterios aceptación objetivos, checklist validación</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <bpmn:textAnnotation id="Annotation_Muda2">
+      <bpmn:text>⏱️ ESPERA - Proceso muestra 5-10 días + aprobación cliente 2-5 días
+🔄 REPROCESO - 30% muestras requieren ajustes (sin specs claras)
+🟡 MEJORA: Specs técnicas detalladas desde diseño, reduce iteraciones</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <!-- Asociaciones de Anotaciones -->
+    <bpmn:association id="Association_Muda1" sourceRef="Annotation_Muda1" targetRef="Task_AprobarDiseno"/>
+    <bpmn:association id="Association_Muda2" sourceRef="Annotation_Muda2" targetRef="Task_AprobarMuestra"/>
+
+    <!-- Flujos de Secuencia -->
+    <bpmn:sequenceFlow id="Flow_01" sourceRef="Start_SolicitudPedido" targetRef="Task_RecibirCotizacion"/>
+    <bpmn:sequenceFlow id="Flow_02" sourceRef="Task_RecibirCotizacion" targetRef="Task_AprobarDiseno"/>
+    <bpmn:sequenceFlow id="Flow_03" sourceRef="Task_AprobarDiseno" targetRef="Task_PagoInicial"/>
+    <bpmn:sequenceFlow id="Flow_04" sourceRef="Task_PagoInicial" targetRef="Task_AprobarMuestra"/>
+    <bpmn:sequenceFlow id="Flow_05" sourceRef="Task_AprobarMuestra" targetRef="Task_PagoFinal"/>
+    <bpmn:sequenceFlow id="Flow_06" sourceRef="Task_PagoFinal" targetRef="Task_RecibirProducto"/>
+    <bpmn:sequenceFlow id="Flow_07" sourceRef="Task_RecibirProducto" targetRef="End_ClienteSatisfecho"/>
+  </bpmn:process>
+
+  <!-- Proceso Bodega y Logística -->
+  <bpmn:process id="Process_Bodega" name="Bodega y Logística">
+    <bpmn:task id="Task_BuscarMateriales" name="Buscar materiales en bodega"/>
+
+    <bpmn:task id="Task_TransporteBodegaCasaMatriz" name="Transportar materiales bodega → casa matriz"/>
+
+    <bpmn:task id="Task_ControlInventarioManual" name="Actualizar Excel control inventarios"/>
+
+    <bpmn:task id="Task_InventarioExcesivo" name="Almacenar inventario clase C (baja rotación)"/>
+
+    <bpmn:task id="Task_PrepararDespacho" name="Preparar pedido para despacho"/>
+
+    <!-- Anotaciones del Proceso Bodega -->
+    <bpmn:textAnnotation id="Annotation_Muda3">
+      <bpmn:text>🔴 MUDA CRÍTICA - Búsqueda manual 15-30 min/operario/día
+🏃 MOVIMIENTO INNECESARIO - Sin ubicaciones definidas, recorridos largos
+⏱️ ESPERA - Producción parada esperando materiales
+🟡 MEJORA: WMS con ubicaciones específicas, código barras, señalización 5S</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <bpmn:textAnnotation id="Annotation_Muda4">
+      <bpmn:text>🔴 MUDA CRÍTICA - Transporte innecesario
+🚚 2-3 viajes diarios × 30 km × 60 min = 660 horas/año perdidas
+💰 Costo: $6.6M/año (tiempo + combustible + desgaste + riesgo)
+🟡 MEJORA: Consolidación instalaciones o WMS multi-sitio con milk run optimizado</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <bpmn:textAnnotation id="Annotation_Muda5">
+      <bpmn:text>🔴 MUDA - Sobreprocesamiento manual
+📝 Captura datos manual Excel = errores 15-25%
+⏱️ Tiempo consumido sin valor agregado
+🔄 Reproceso cuando hay discrepancias con físico
+🟡 MEJORA: WMS automatiza captura tiempo real, elimina Excel manual</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <bpmn:textAnnotation id="Annotation_Muda6">
+      <bpmn:text>🔴 MUDA - Inventario excesivo
+📦 $15-30M capital inmovilizado en materiales baja rotación (&lt;2x/año)
+💰 Costo oportunidad 8% = $1.2-2.4M/año
+🏢 Espacio bodega ocupado innecesariamente
+🟡 MEJORA: Clasificación ABC rigurosa, Kanban clase A, liquidación clase C</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <bpmn:textAnnotation id="Annotation_Muda7">
+      <bpmn:text>⏱️ ESPERA - Coordinación telefónica/WhatsApp reactiva
+🏃 MOVIMIENTO - Picking sin ruta optimizada
+🟡 MEJORA: Sistema picking optimizado, wave picking, rutas definidas</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <!-- Asociaciones de Anotaciones -->
+    <bpmn:association id="Association_Muda3" sourceRef="Annotation_Muda3" targetRef="Task_BuscarMateriales"/>
+    <bpmn:association id="Association_Muda4" sourceRef="Annotation_Muda4" targetRef="Task_TransporteBodegaCasaMatriz"/>
+    <bpmn:association id="Association_Muda5" sourceRef="Annotation_Muda5" targetRef="Task_ControlInventarioManual"/>
+    <bpmn:association id="Association_Muda6" sourceRef="Annotation_Muda6" targetRef="Task_InventarioExcesivo"/>
+    <bpmn:association id="Association_Muda7" sourceRef="Annotation_Muda7" targetRef="Task_PrepararDespacho"/>
+  </bpmn:process>
+
+  <!-- Proceso Producción -->
+  <bpmn:process id="Process_Produccion" name="Producción">
+    <bpmn:task id="Task_ElaborarMuestras" name="Elaborar muestras físicas"/>
+
+    <bpmn:task id="Task_Confeccionar" name="Confeccionar prendas en serie"/>
+
+    <bpmn:task id="Task_ControlCalidad" name="Control de calidad confección"/>
+
+    <!-- Anotaciones del Proceso Producción -->
+    <bpmn:textAnnotation id="Annotation_Muda8">
+      <bpmn:text>🔄 REPROCESO - 30% muestras requieren ajustes por specs poco claras
+⏱️ ESPERA - Espera materiales de bodega 15-30 min
+🟡 MEJORA: Specs técnicas claras, kit materiales pre-preparado</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <bpmn:textAnnotation id="Annotation_Muda9">
+      <bpmn:text>🏃 MOVIMIENTO INNECESARIO - Layout no optimizado, herramientas lejos
+⏱️ ESPERA - Espera materiales, espera máquinas disponibles
+🔄 REPROCESO - Tasa defectos 3-5% por ausencia SOP y Poka-Yoke
+🟡 MEJORA: Células manufactura, 5S, SOP con fotos, Poka-Yoke puntos críticos</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <bpmn:textAnnotation id="Annotation_Muda10">
+      <bpmn:text>🔴 SOBREPROCESAMIENTO - Inspecciones redundantes sin criterios claros
+📝 Mismo producto inspeccionado múltiples veces por diferentes personas
+🟡 MEJORA: Inspección en la fuente (Jidoka), checklist objetivo, roles RACI claros</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <!-- Asociaciones de Anotaciones -->
+    <bpmn:association id="Association_Muda8" sourceRef="Annotation_Muda8" targetRef="Task_ElaborarMuestras"/>
+    <bpmn:association id="Association_Muda9" sourceRef="Annotation_Muda9" targetRef="Task_Confeccionar"/>
+    <bpmn:association id="Association_Muda10" sourceRef="Annotation_Muda10" targetRef="Task_ControlCalidad"/>
+  </bpmn:process>
+
+  <!-- Proceso Diseño -->
+  <bpmn:process id="Process_Diseno" name="Diseño y Bordado">
+    <bpmn:task id="Task_DesarrollarDiseno" name="Desarrollar propuestas diseño"/>
+
+    <!-- Anotaciones del Proceso Diseño -->
+    <bpmn:textAnnotation id="Annotation_Muda11">
+      <bpmn:text>⏱️ ESPERA - Espera referencias cliente (clientes nuevos)
+🔄 REPROCESO - Iteraciones múltiples por falta brief detallado inicial
+🟡 MEJORA: Template brief cliente estructurado, banco referencias estándar</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <!-- Asociaciones de Anotaciones -->
+    <bpmn:association id="Association_Muda11" sourceRef="Annotation_Muda11" targetRef="Task_DesarrollarDiseno"/>
+  </bpmn:process>
+
+  <!-- Proceso Administración -->
+  <bpmn:process id="Process_Admin" name="Administración">
+    <bpmn:task id="Task_IngresarERPDtemite" name="Ingresar pedido a producción ERP Dtemite"/>
+
+    <!-- Anotaciones del Proceso Administración -->
+    <bpmn:textAnnotation id="Annotation_Muda12">
+      <bpmn:text>🔴 SOBREPROCESAMIENTO - Captura datos en ERP + Excel + Papel (triplicado)
+⏱️ Tiempo administrativo sin valor agregado
+🟡 MEJORA: Integración ERP-WMS elimina captura múltiple</bpmn:text>
+    </bpmn:textAnnotation>
+
+    <!-- Asociaciones de Anotaciones -->
+    <bpmn:association id="Association_Muda12" sourceRef="Annotation_Muda12" targetRef="Task_IngresarERPDtemite"/>
+  </bpmn:process>
+
+  <!-- Proceso Ventas (vacío pero referenciado) -->
+  <bpmn:process id="Process_Ventas" name="Ventas"/>
+
+</bpmn:definitions>
