@@ -1,957 +1,953 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
-  id="Definitions_Buzines_Lean"
-  targetNamespace="http://bpmn.io/schema/bpmn">
-
-  <bpmn:collaboration id="Collaboration_BuzinesLean">
-    <bpmn:participant id="Participant_Cliente" name="CLIENTE" processRef="Process_Cliente"/>
-    <bpmn:participant id="Participant_Ventas" name="VENTAS" processRef="Process_Ventas"/>
-    <bpmn:participant id="Participant_Admin" name="ADMINISTRACIÓN" processRef="Process_Admin"/>
-    <bpmn:participant id="Participant_Diseno" name="DISEÑO Y BORDADO" processRef="Process_Diseno"/>
-    <bpmn:participant id="Participant_Produccion" name="PRODUCCIÓN" processRef="Process_Produccion"/>
-    <bpmn:participant id="Participant_Bodega" name="BODEGA Y LOGÍSTICA" processRef="Process_Bodega"/>
-
-    <!-- Message Flows entre participantes -->
-    <bpmn:messageFlow id="MsgFlow_01" sourceRef="Start_SolicitudPedido" targetRef="Task_RecibirSolicitud"/>
-    <bpmn:messageFlow id="MsgFlow_02" sourceRef="Task_EnviarCotizacion" targetRef="Task_RecibirCotizacion"/>
-    <bpmn:messageFlow id="MsgFlow_03" sourceRef="Task_AprobarDiseno" targetRef="Task_RecibirAprobacion"/>
-    <bpmn:messageFlow id="MsgFlow_04" sourceRef="Task_SolicitarDiseno" targetRef="Task_DesarrollarDiseno"/>
-    <bpmn:messageFlow id="MsgFlow_05" sourceRef="Task_DesarrollarDiseno" targetRef="Task_AprobarDiseno"/>
-    <bpmn:messageFlow id="MsgFlow_06" sourceRef="Task_PagoInicial" targetRef="Task_RegistrarPago"/>
-    <bpmn:messageFlow id="MsgFlow_07" sourceRef="Task_OrdenProduccion" targetRef="Task_ElaborarMuestras"/>
-    <bpmn:messageFlow id="MsgFlow_08" sourceRef="Task_ElaborarMuestras" targetRef="Task_AprobarMuestra"/>
-    <bpmn:messageFlow id="MsgFlow_09" sourceRef="Task_AprobarMuestra" targetRef="Task_ConfirmarProduccion"/>
-    <bpmn:messageFlow id="MsgFlow_10" sourceRef="Task_PagoFinal" targetRef="Task_RegistrarPagoFinal"/>
-    <bpmn:messageFlow id="MsgFlow_11" sourceRef="Task_SolicitarMateriales" targetRef="Task_BuscarMateriales"/>
-    <bpmn:messageFlow id="MsgFlow_12" sourceRef="Task_PrepararDespacho" targetRef="Task_RecibirProducto"/>
-
-    <!-- Anotaciones Lean -->
-    <bpmn:textAnnotation id="Annotation_Lean_Legend">
-      <bpmn:text>🔴 MUDA IDENTIFICADA (No agrega valor)
-🟡 OPORTUNIDAD DE MEJORA
-⏱️ ESPERA (Waiting)
-🚚 TRANSPORTE INNECESARIO
-🔄 REPROCESO POTENCIAL
-📦 INVENTARIO EXCESIVO
-🏃 MOVIMIENTO INNECESARIO</bpmn:text>
-    </bpmn:textAnnotation>
-  </bpmn:collaboration>
-
-  <!-- ========================================== -->
-  <!-- PROCESO CLIENTE                            -->
-  <!-- ========================================== -->
-  <bpmn:process id="Process_Cliente" name="Cliente">
-    <bpmn:startEvent id="Start_SolicitudPedido" name="Enviar solicitud pedido">
-      <bpmn:outgoing>Flow_C01</bpmn:outgoing>
-    </bpmn:startEvent>
-
-    <bpmn:task id="Task_RecibirCotizacion" name="Recibir y revisar cotización">
-      <bpmn:incoming>Flow_C01</bpmn:incoming>
-      <bpmn:outgoing>Flow_C02</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_AprobarDiseno" name="Revisar y aprobar diseño propuesto">
-      <bpmn:incoming>Flow_C02</bpmn:incoming>
-      <bpmn:outgoing>Flow_C03</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_PagoInicial" name="Realizar pago inicial 50%">
-      <bpmn:incoming>Flow_C03</bpmn:incoming>
-      <bpmn:outgoing>Flow_C04</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_AprobarMuestra" name="Aprobar muestra física">
-      <bpmn:incoming>Flow_C04</bpmn:incoming>
-      <bpmn:outgoing>Flow_C05</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_PagoFinal" name="Realizar pago final 50%">
-      <bpmn:incoming>Flow_C05</bpmn:incoming>
-      <bpmn:outgoing>Flow_C06</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_RecibirProducto" name="Recibir producto y firmar conformidad">
-      <bpmn:incoming>Flow_C06</bpmn:incoming>
-      <bpmn:outgoing>Flow_C07</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:endEvent id="End_ClienteSatisfecho" name="Cliente satisfecho">
-      <bpmn:incoming>Flow_C07</bpmn:incoming>
-    </bpmn:endEvent>
-
-    <!-- Anotaciones del Proceso Cliente -->
-    <bpmn:textAnnotation id="Annotation_Muda1">
-      <bpmn:text>⏱️ ESPERA - Cliente toma 3-7 días en aprobar (sin criterios claros)
-🟡 MEJORA: Definir criterios aceptación objetivos, checklist validación</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:textAnnotation id="Annotation_Muda2">
-      <bpmn:text>⏱️ ESPERA - Proceso muestra 5-10 días + aprobación cliente 2-5 días
-🔄 REPROCESO - 30% muestras requieren ajustes (sin specs claras)
-🟡 MEJORA: Specs técnicas detalladas desde diseño, reduce iteraciones</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:association id="Association_Muda1" sourceRef="Annotation_Muda1" targetRef="Task_AprobarDiseno"/>
-    <bpmn:association id="Association_Muda2" sourceRef="Annotation_Muda2" targetRef="Task_AprobarMuestra"/>
-
-    <bpmn:sequenceFlow id="Flow_C01" sourceRef="Start_SolicitudPedido" targetRef="Task_RecibirCotizacion"/>
-    <bpmn:sequenceFlow id="Flow_C02" sourceRef="Task_RecibirCotizacion" targetRef="Task_AprobarDiseno"/>
-    <bpmn:sequenceFlow id="Flow_C03" sourceRef="Task_AprobarDiseno" targetRef="Task_PagoInicial"/>
-    <bpmn:sequenceFlow id="Flow_C04" sourceRef="Task_PagoInicial" targetRef="Task_AprobarMuestra"/>
-    <bpmn:sequenceFlow id="Flow_C05" sourceRef="Task_AprobarMuestra" targetRef="Task_PagoFinal"/>
-    <bpmn:sequenceFlow id="Flow_C06" sourceRef="Task_PagoFinal" targetRef="Task_RecibirProducto"/>
-    <bpmn:sequenceFlow id="Flow_C07" sourceRef="Task_RecibirProducto" targetRef="End_ClienteSatisfecho"/>
-  </bpmn:process>
-
-  <!-- ========================================== -->
-  <!-- PROCESO VENTAS                             -->
-  <!-- ========================================== -->
-  <bpmn:process id="Process_Ventas" name="Ventas">
-    <bpmn:task id="Task_RecibirSolicitud" name="Recibir solicitud cliente">
-      <bpmn:outgoing>Flow_V01</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_PrepararCotizacion" name="Preparar cotización">
-      <bpmn:incoming>Flow_V01</bpmn:incoming>
-      <bpmn:outgoing>Flow_V02</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_EnviarCotizacion" name="Enviar cotización a cliente">
-      <bpmn:incoming>Flow_V02</bpmn:incoming>
-      <bpmn:outgoing>Flow_V03</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_SolicitarDiseno" name="Solicitar diseño">
-      <bpmn:incoming>Flow_V03</bpmn:incoming>
-      <bpmn:outgoing>Flow_V04</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_RecibirAprobacion" name="Recibir aprobación cliente">
-      <bpmn:incoming>Flow_V04</bpmn:incoming>
-      <bpmn:outgoing>Flow_V05</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_CoordinarProduccion" name="Coordinar con producción">
-      <bpmn:incoming>Flow_V05</bpmn:incoming>
-    </bpmn:task>
-
-    <bpmn:sequenceFlow id="Flow_V01" sourceRef="Task_RecibirSolicitud" targetRef="Task_PrepararCotizacion"/>
-    <bpmn:sequenceFlow id="Flow_V02" sourceRef="Task_PrepararCotizacion" targetRef="Task_EnviarCotizacion"/>
-    <bpmn:sequenceFlow id="Flow_V03" sourceRef="Task_EnviarCotizacion" targetRef="Task_SolicitarDiseno"/>
-    <bpmn:sequenceFlow id="Flow_V04" sourceRef="Task_SolicitarDiseno" targetRef="Task_RecibirAprobacion"/>
-    <bpmn:sequenceFlow id="Flow_V05" sourceRef="Task_RecibirAprobacion" targetRef="Task_CoordinarProduccion"/>
-  </bpmn:process>
-
-  <!-- ========================================== -->
-  <!-- PROCESO ADMINISTRACIÓN                     -->
-  <!-- ========================================== -->
-  <bpmn:process id="Process_Admin" name="Administración">
-    <bpmn:task id="Task_RegistrarPago" name="Registrar pago inicial">
-      <bpmn:outgoing>Flow_A01</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_IngresarERPDtemite" name="Ingresar pedido a producción ERP Dtemite">
-      <bpmn:incoming>Flow_A01</bpmn:incoming>
-      <bpmn:outgoing>Flow_A02</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_OrdenProduccion" name="Generar orden de producción">
-      <bpmn:incoming>Flow_A02</bpmn:incoming>
-      <bpmn:outgoing>Flow_A03</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_ConfirmarProduccion" name="Confirmar producción serie">
-      <bpmn:incoming>Flow_A03</bpmn:incoming>
-      <bpmn:outgoing>Flow_A04</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_RegistrarPagoFinal" name="Registrar pago final">
-      <bpmn:incoming>Flow_A04</bpmn:incoming>
-      <bpmn:outgoing>Flow_A05</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_AutorizarDespacho" name="Autorizar despacho">
-      <bpmn:incoming>Flow_A05</bpmn:incoming>
-    </bpmn:task>
-
-    <bpmn:textAnnotation id="Annotation_Muda12">
-      <bpmn:text>🔴 SOBREPROCESAMIENTO - Captura datos en ERP + Excel + Papel (triplicado)
-⏱️ Tiempo administrativo sin valor agregado
-🟡 MEJORA: Integración ERP-WMS elimina captura múltiple</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:association id="Association_Muda12" sourceRef="Annotation_Muda12" targetRef="Task_IngresarERPDtemite"/>
-
-    <bpmn:sequenceFlow id="Flow_A01" sourceRef="Task_RegistrarPago" targetRef="Task_IngresarERPDtemite"/>
-    <bpmn:sequenceFlow id="Flow_A02" sourceRef="Task_IngresarERPDtemite" targetRef="Task_OrdenProduccion"/>
-    <bpmn:sequenceFlow id="Flow_A03" sourceRef="Task_OrdenProduccion" targetRef="Task_ConfirmarProduccion"/>
-    <bpmn:sequenceFlow id="Flow_A04" sourceRef="Task_ConfirmarProduccion" targetRef="Task_RegistrarPagoFinal"/>
-    <bpmn:sequenceFlow id="Flow_A05" sourceRef="Task_RegistrarPagoFinal" targetRef="Task_AutorizarDespacho"/>
-  </bpmn:process>
-
-  <!-- ========================================== -->
-  <!-- PROCESO DISEÑO                             -->
-  <!-- ========================================== -->
-  <bpmn:process id="Process_Diseno" name="Diseño y Bordado">
-    <bpmn:task id="Task_DesarrollarDiseno" name="Desarrollar propuestas diseño">
-      <bpmn:outgoing>Flow_D01</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_PrepararArchivos" name="Preparar archivos digitales">
-      <bpmn:incoming>Flow_D01</bpmn:incoming>
-      <bpmn:outgoing>Flow_D02</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_ProgramarBordado" name="Programar máquina bordado">
-      <bpmn:incoming>Flow_D02</bpmn:incoming>
-    </bpmn:task>
-
-    <bpmn:textAnnotation id="Annotation_Muda11">
-      <bpmn:text>⏱️ ESPERA - Espera referencias cliente (clientes nuevos)
-🔄 REPROCESO - Iteraciones múltiples por falta brief detallado inicial
-🟡 MEJORA: Template brief cliente estructurado, banco referencias estándar</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:association id="Association_Muda11" sourceRef="Annotation_Muda11" targetRef="Task_DesarrollarDiseno"/>
-
-    <bpmn:sequenceFlow id="Flow_D01" sourceRef="Task_DesarrollarDiseno" targetRef="Task_PrepararArchivos"/>
-    <bpmn:sequenceFlow id="Flow_D02" sourceRef="Task_PrepararArchivos" targetRef="Task_ProgramarBordado"/>
-  </bpmn:process>
-
-  <!-- ========================================== -->
-  <!-- PROCESO PRODUCCIÓN                         -->
-  <!-- ========================================== -->
-  <bpmn:process id="Process_Produccion" name="Producción">
-    <bpmn:task id="Task_SolicitarMateriales" name="Solicitar materiales a bodega">
-      <bpmn:outgoing>Flow_P01</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_RecibirMateriales" name="Recibir materiales">
-      <bpmn:incoming>Flow_P01</bpmn:incoming>
-      <bpmn:outgoing>Flow_P02</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_ElaborarMuestras" name="Elaborar muestras físicas">
-      <bpmn:incoming>Flow_P02</bpmn:incoming>
-      <bpmn:outgoing>Flow_P03</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_Confeccionar" name="Confeccionar prendas en serie">
-      <bpmn:incoming>Flow_P03</bpmn:incoming>
-      <bpmn:outgoing>Flow_P04</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_ControlCalidad" name="Control de calidad confección">
-      <bpmn:incoming>Flow_P04</bpmn:incoming>
-      <bpmn:outgoing>Flow_P05</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_EmpaquetarProducto" name="Empaquetar producto terminado">
-      <bpmn:incoming>Flow_P05</bpmn:incoming>
-      <bpmn:outgoing>Flow_P06</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_EnviarBodega" name="Enviar a bodega">
-      <bpmn:incoming>Flow_P06</bpmn:incoming>
-    </bpmn:task>
-
-    <bpmn:textAnnotation id="Annotation_Muda8">
-      <bpmn:text>🔄 REPROCESO - 30% muestras requieren ajustes por specs poco claras
-⏱️ ESPERA - Espera materiales de bodega 15-30 min
-🟡 MEJORA: Specs técnicas claras, kit materiales pre-preparado</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:textAnnotation id="Annotation_Muda9">
-      <bpmn:text>🏃 MOVIMIENTO INNECESARIO - Layout no optimizado, herramientas lejos
-⏱️ ESPERA - Espera materiales, espera máquinas disponibles
-🔄 REPROCESO - Tasa defectos 3-5% por ausencia SOP y Poka-Yoke
-🟡 MEJORA: Células manufactura, 5S, SOP con fotos, Poka-Yoke puntos críticos</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:textAnnotation id="Annotation_Muda10">
-      <bpmn:text>🔴 SOBREPROCESAMIENTO - Inspecciones redundantes sin criterios claros
-📝 Mismo producto inspeccionado múltiples veces por diferentes personas
-🟡 MEJORA: Inspección en la fuente (Jidoka), checklist objetivo, roles RACI claros</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:association id="Association_Muda8" sourceRef="Annotation_Muda8" targetRef="Task_ElaborarMuestras"/>
-    <bpmn:association id="Association_Muda9" sourceRef="Annotation_Muda9" targetRef="Task_Confeccionar"/>
-    <bpmn:association id="Association_Muda10" sourceRef="Annotation_Muda10" targetRef="Task_ControlCalidad"/>
-
-    <bpmn:sequenceFlow id="Flow_P01" sourceRef="Task_SolicitarMateriales" targetRef="Task_RecibirMateriales"/>
-    <bpmn:sequenceFlow id="Flow_P02" sourceRef="Task_RecibirMateriales" targetRef="Task_ElaborarMuestras"/>
-    <bpmn:sequenceFlow id="Flow_P03" sourceRef="Task_ElaborarMuestras" targetRef="Task_Confeccionar"/>
-    <bpmn:sequenceFlow id="Flow_P04" sourceRef="Task_Confeccionar" targetRef="Task_ControlCalidad"/>
-    <bpmn:sequenceFlow id="Flow_P05" sourceRef="Task_ControlCalidad" targetRef="Task_EmpaquetarProducto"/>
-    <bpmn:sequenceFlow id="Flow_P06" sourceRef="Task_EmpaquetarProducto" targetRef="Task_EnviarBodega"/>
-  </bpmn:process>
-
-  <!-- ========================================== -->
-  <!-- PROCESO BODEGA                             -->
-  <!-- ========================================== -->
-  <bpmn:process id="Process_Bodega" name="Bodega y Logística">
-    <bpmn:task id="Task_BuscarMateriales" name="Buscar materiales en bodega">
-      <bpmn:outgoing>Flow_B01</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_TransporteBodegaCasaMatriz" name="Transportar materiales bodega → casa matriz">
-      <bpmn:incoming>Flow_B01</bpmn:incoming>
-      <bpmn:outgoing>Flow_B02</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_ControlInventarioManual" name="Actualizar Excel control inventarios">
-      <bpmn:incoming>Flow_B02</bpmn:incoming>
-      <bpmn:outgoing>Flow_B03</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_EntregarMateriales" name="Entregar materiales a producción">
-      <bpmn:incoming>Flow_B03</bpmn:incoming>
-      <bpmn:outgoing>Flow_B04</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_RecibirProductoTerminado" name="Recibir producto terminado">
-      <bpmn:incoming>Flow_B04</bpmn:incoming>
-      <bpmn:outgoing>Flow_B05</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_InventarioExcesivo" name="Almacenar inventario clase C (baja rotación)">
-      <bpmn:incoming>Flow_B05</bpmn:incoming>
-      <bpmn:outgoing>Flow_B06</bpmn:outgoing>
-    </bpmn:task>
-
-    <bpmn:task id="Task_PrepararDespacho" name="Preparar pedido para despacho">
-      <bpmn:incoming>Flow_B06</bpmn:incoming>
-    </bpmn:task>
-
-    <bpmn:textAnnotation id="Annotation_Muda3">
-      <bpmn:text>🔴 MUDA CRÍTICA - Búsqueda manual 15-30 min/operario/día
-🏃 MOVIMIENTO INNECESARIO - Sin ubicaciones definidas, recorridos largos
-⏱️ ESPERA - Producción parada esperando materiales
-🟡 MEJORA: WMS con ubicaciones específicas, código barras, señalización 5S</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:textAnnotation id="Annotation_Muda4">
-      <bpmn:text>🔴 MUDA CRÍTICA - Transporte innecesario
-🚚 2-3 viajes diarios × 30 km × 60 min = 660 horas/año perdidas
-💰 Costo: $6.6M/año (tiempo + combustible + desgaste + riesgo)
-🟡 MEJORA: Consolidación instalaciones o WMS multi-sitio con milk run optimizado</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:textAnnotation id="Annotation_Muda5">
-      <bpmn:text>🔴 MUDA - Sobreprocesamiento manual
-📝 Captura datos manual Excel = errores 15-25%
-⏱️ Tiempo consumido sin valor agregado
-🔄 Reproceso cuando hay discrepancias con físico
-🟡 MEJORA: WMS automatiza captura tiempo real, elimina Excel manual</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:textAnnotation id="Annotation_Muda6">
-      <bpmn:text>🔴 MUDA - Inventario excesivo
-📦 $15-30M capital inmovilizado en materiales baja rotación (&lt;2x/año)
-💰 Costo oportunidad 8% = $1.2-2.4M/año
-🏢 Espacio bodega ocupado innecesariamente
-🟡 MEJORA: Clasificación ABC rigurosa, Kanban clase A, liquidación clase C</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:textAnnotation id="Annotation_Muda7">
-      <bpmn:text>⏱️ ESPERA - Coordinación telefónica/WhatsApp reactiva
-🏃 MOVIMIENTO - Picking sin ruta optimizada
-🟡 MEJORA: Sistema picking optimizado, wave picking, rutas definidas</bpmn:text>
-    </bpmn:textAnnotation>
-
-    <bpmn:association id="Association_Muda3" sourceRef="Annotation_Muda3" targetRef="Task_BuscarMateriales"/>
-    <bpmn:association id="Association_Muda4" sourceRef="Annotation_Muda4" targetRef="Task_TransporteBodegaCasaMatriz"/>
-    <bpmn:association id="Association_Muda5" sourceRef="Annotation_Muda5" targetRef="Task_ControlInventarioManual"/>
-    <bpmn:association id="Association_Muda6" sourceRef="Annotation_Muda6" targetRef="Task_InventarioExcesivo"/>
-    <bpmn:association id="Association_Muda7" sourceRef="Annotation_Muda7" targetRef="Task_PrepararDespacho"/>
-
-    <bpmn:sequenceFlow id="Flow_B01" sourceRef="Task_BuscarMateriales" targetRef="Task_TransporteBodegaCasaMatriz"/>
-    <bpmn:sequenceFlow id="Flow_B02" sourceRef="Task_TransporteBodegaCasaMatriz" targetRef="Task_ControlInventarioManual"/>
-    <bpmn:sequenceFlow id="Flow_B03" sourceRef="Task_ControlInventarioManual" targetRef="Task_EntregarMateriales"/>
-    <bpmn:sequenceFlow id="Flow_B04" sourceRef="Task_EntregarMateriales" targetRef="Task_RecibirProductoTerminado"/>
-    <bpmn:sequenceFlow id="Flow_B05" sourceRef="Task_RecibirProductoTerminado" targetRef="Task_InventarioExcesivo"/>
-    <bpmn:sequenceFlow id="Flow_B06" sourceRef="Task_InventarioExcesivo" targetRef="Task_PrepararDespacho"/>
-  </bpmn:process>
-
-  <!-- ============================================ -->
-  <!-- DIAGRAMA VISUAL CON COORDENADAS             -->
-  <!-- ============================================ -->
-
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0"
+             targetNamespace="http://www.omg.org/bpmn20"
+             id="Definitions_Buzines_Final">
+
+  <collaboration id="Collaboration_Buzines">
+    <participant id="Participant_Cliente" name="CLIENTE" processRef="Process_Cliente"/>
+    <participant id="Participant_Ventas" name="VENTAS" processRef="Process_Ventas"/>
+    <participant id="Participant_Admin" name="ADMINISTRACION" processRef="Process_Admin"/>
+    <participant id="Participant_Diseno" name="DISENO Y BORDADO" processRef="Process_Diseno"/>
+    <participant id="Participant_Produccion" name="PRODUCCION" processRef="Process_Produccion"/>
+    <participant id="Participant_Bodega" name="BODEGA Y LOGISTICA" processRef="Process_Bodega"/>
+
+    <!-- =========== MESSAGE FLOWS COMPLETOS =========== -->
+    <!-- 1. Cliente → Ventas: Solicitud -->
+    <messageFlow id="MsgFlow_01" sourceRef="Event_Start" targetRef="Task_RecibirSolicitud" name="Solicitud pedido"/>
+
+    <!-- 2. Ventas → Cliente: Cotización -->
+    <messageFlow id="MsgFlow_02" sourceRef="Task_EnviarCotizacion" targetRef="Task_RecibirCotizacion" name="Cotizacion PDF"/>
+
+    <!-- 3. Ventas → Diseño: Solicitud de diseño -->
+    <messageFlow id="MsgFlow_03" sourceRef="Task_SolicitarReferencias" targetRef="Task_DesarrollarDiseno" name="Brief diseño"/>
+
+    <!-- 4. Diseño → Cliente: Diseño propuesto -->
+    <messageFlow id="MsgFlow_04" sourceRef="Task_ControlCalidadDiseno" targetRef="Task_AprobarDiseno" name="Propuesta diseño"/>
+
+    <!-- 5. Cliente → Ventas: Aprobación diseño -->
+    <messageFlow id="MsgFlow_05" sourceRef="Task_AprobarDiseno" targetRef="Gateway_ClienteNuevo" name="Aprobacion"/>
+
+    <!-- 6. Cliente → Admin: Pago inicial -->
+    <messageFlow id="MsgFlow_06" sourceRef="Task_PagoInicial" targetRef="Task_ProcesarOC" name="Pago 50%"/>
+
+    <!-- 7. Admin → Producción: Orden de producción -->
+    <messageFlow id="MsgFlow_07" sourceRef="Task_IngresarERP" targetRef="Task_ElaborarMuestras" name="Orden produccion"/>
+
+    <!-- 8. Producción → Bodega: Solicitud materiales -->
+    <messageFlow id="MsgFlow_08" sourceRef="Task_ElaborarMuestras" targetRef="Task_BuscarMateriales" name="Requerimiento materiales"/>
+
+    <!-- 9. Bodega → Producción: Entrega materiales -->
+    <messageFlow id="MsgFlow_09" sourceRef="Task_TransportarMateriales" targetRef="Task_AjustarMuestras" name="Materiales"/>
+
+    <!-- 10. Producción → Cliente: Muestra física -->
+    <messageFlow id="MsgFlow_10" sourceRef="Task_AjustarMuestras" targetRef="Task_AprobarMuestra" name="Muestra fisica"/>
+
+    <!-- 11. Cliente → Admin: Aprobación muestra -->
+    <messageFlow id="MsgFlow_11" sourceRef="Task_AprobarMuestra" targetRef="Task_SolicitarPagoFinal" name="Aprobacion muestra"/>
+
+    <!-- 12. Cliente → Admin: Pago final -->
+    <messageFlow id="MsgFlow_12" sourceRef="Task_PagoFinal" targetRef="Task_GenerarFacturas" name="Pago 50%"/>
+
+    <!-- 13. Producción → Bodega: Producto terminado -->
+    <messageFlow id="MsgFlow_13" sourceRef="Task_ControlCalidadProduccion" targetRef="Task_AlmacenarInventario" name="Producto terminado"/>
+
+    <!-- 14. Bodega → Cliente: Entrega final -->
+    <messageFlow id="MsgFlow_14" sourceRef="Task_CoordinarEntrega" targetRef="Task_RecibirProducto" name="Notificacion entrega"/>
+
+    <!-- =========== ANOTACIONES GLOBALES =========== -->
+    <textAnnotation id="Annotation_Leyenda">
+      <text>LEYENDA LEAN MANUFACTURING:
+🔴 ROJO = MUDA CRITICA (impacto mayor a 2M pesos/año)
+🟡 AMARILLO = OPORTUNIDAD DE MEJORA
+
+SIMBOLOS:
+⏱️ = ESPERA (Waiting)
+🚚 = TRANSPORTE INNECESARIO
+🔄 = REPROCESO
+📦 = INVENTARIO EXCESIVO
+🏃 = MOVIMIENTO INNECESARIO
+📝 = SOBREPROCESAMIENTO
+
+TIPOS DE TAREA:
+👤 = Tarea de Usuario    ✋ = Tarea Manual
+⚙️ = Tarea de Servicio   📄 = Tarea de Script</text>
+    </textAnnotation>
+
+    <textAnnotation id="Annotation_Resumen">
+      <text>RESUMEN IMPACTO ECONOMICO MUDAS:
+🔴 MUDAS CRITICAS (6):
+  M4: Transporte innecesario ........ $6.6M/año
+  M9: Defectos confeccion ....... $5.5-8.5M/año
+  M3: Busqueda materiales ..... $2.75-3.62M/año
+  M10: Control calidad .............. $2-4M/año
+  M12: Captura triplicada ........... $1-2M/año
+  M5: Excel inventarios ...... $800K-1.2M/año
+  SUBTOTAL: .............. $18.65-26.92M/año
+
+🟡 OPORTUNIDADES MEJORA (6): ..... $6-12M/año
+
+💰 AHORRO POTENCIAL TOTAL: ..... $24-38M/año
+📊 Ahorro conservador 70%: ....... $16.8-26.6M/año</text>
+    </textAnnotation>
+  </collaboration>
+
+  <!-- ==================== PROCESO CLIENTE ==================== -->
+  <process id="Process_Cliente" name="Cliente" isExecutable="false">
+    <laneSet id="LaneSet_Cliente">
+      <lane id="Lane_Cliente" name="Cliente">
+        <flowNodeRef>Event_Start</flowNodeRef>
+        <flowNodeRef>Task_RecibirCotizacion</flowNodeRef>
+        <flowNodeRef>Task_AprobarDiseno</flowNodeRef>
+        <flowNodeRef>Task_PagoInicial</flowNodeRef>
+        <flowNodeRef>Task_AprobarMuestra</flowNodeRef>
+        <flowNodeRef>Task_PagoFinal</flowNodeRef>
+        <flowNodeRef>Task_RecibirProducto</flowNodeRef>
+        <flowNodeRef>Event_End</flowNodeRef>
+      </lane>
+    </laneSet>
+
+    <startEvent id="Event_Start" name="Enviar solicitud pedido">
+      <outgoing>Flow_C01</outgoing>
+    </startEvent>
+
+    <userTask id="Task_RecibirCotizacion" name="Recibir y revisar cotizacion">
+      <incoming>Flow_C01</incoming>
+      <outgoing>Flow_C02</outgoing>
+    </userTask>
+
+    <userTask id="Task_AprobarDiseno" name="Revisar y aprobar diseno propuesto">
+      <incoming>Flow_C02</incoming>
+      <outgoing>Flow_C03</outgoing>
+    </userTask>
+
+    <task id="Task_PagoInicial" name="Realizar pago inicial 50%">
+      <incoming>Flow_C03</incoming>
+      <outgoing>Flow_C04</outgoing>
+    </task>
+
+    <userTask id="Task_AprobarMuestra" name="Aprobar muestra fisica">
+      <incoming>Flow_C04</incoming>
+      <outgoing>Flow_C05</outgoing>
+    </userTask>
+
+    <task id="Task_PagoFinal" name="Realizar pago final 50%">
+      <incoming>Flow_C05</incoming>
+      <outgoing>Flow_C06</outgoing>
+    </task>
+
+    <userTask id="Task_RecibirProducto" name="Recibir producto y firmar conformidad">
+      <incoming>Flow_C06</incoming>
+      <outgoing>Flow_C07</outgoing>
+    </userTask>
+
+    <endEvent id="Event_End" name="Cliente satisfecho">
+      <incoming>Flow_C07</incoming>
+    </endEvent>
+
+    <sequenceFlow id="Flow_C01" sourceRef="Event_Start" targetRef="Task_RecibirCotizacion"/>
+    <sequenceFlow id="Flow_C02" sourceRef="Task_RecibirCotizacion" targetRef="Task_AprobarDiseno"/>
+    <sequenceFlow id="Flow_C03" sourceRef="Task_AprobarDiseno" targetRef="Task_PagoInicial"/>
+    <sequenceFlow id="Flow_C04" sourceRef="Task_PagoInicial" targetRef="Task_AprobarMuestra"/>
+    <sequenceFlow id="Flow_C05" sourceRef="Task_AprobarMuestra" targetRef="Task_PagoFinal"/>
+    <sequenceFlow id="Flow_C06" sourceRef="Task_PagoFinal" targetRef="Task_RecibirProducto"/>
+    <sequenceFlow id="Flow_C07" sourceRef="Task_RecibirProducto" targetRef="Event_End"/>
+
+    <textAnnotation id="Annotation_M1">
+      <text>M1 - MUDA ESPERA
+⏱️ Cliente 3-7 días aprobar (sin criterios)
+🟡 MEJORA: Criterios objetivos + checklist
+💰 Impacto: Retraso 3-7 días</text>
+    </textAnnotation>
+    <association id="Assoc_M1" sourceRef="Task_AprobarDiseno" targetRef="Annotation_M1"/>
+
+    <textAnnotation id="Annotation_M2">
+      <text>M2 - MUDA ESPERA + REPROCESO
+⏱️ Proceso 5-10 días + aprobación 2-5 días
+🔄 30% muestras requieren ajustes
+🟡 MEJORA: Specs técnicas detalladas
+💰 IMPACTO: $2-4M/año</text>
+    </textAnnotation>
+    <association id="Assoc_M2" sourceRef="Task_AprobarMuestra" targetRef="Annotation_M2"/>
+  </process>
+
+  <!-- ==================== PROCESO VENTAS ==================== -->
+  <process id="Process_Ventas" name="Ventas" isExecutable="false">
+    <laneSet id="LaneSet_Ventas">
+      <lane id="Lane_Ventas" name="Ventas">
+        <flowNodeRef>Task_RecibirSolicitud</flowNodeRef>
+        <flowNodeRef>Task_EnviarCotizacion</flowNodeRef>
+        <flowNodeRef>Gateway_ClienteNuevo</flowNodeRef>
+        <flowNodeRef>Task_SolicitarReferencias</flowNodeRef>
+        <flowNodeRef>Task_CrearFichaTecnica</flowNodeRef>
+        <flowNodeRef>Task_SinReferencias</flowNodeRef>
+        <flowNodeRef>Gateway_Merge</flowNodeRef>
+      </lane>
+    </laneSet>
+
+    <task id="Task_RecibirSolicitud" name="Recibir solicitud cliente">
+      <outgoing>Flow_V01</outgoing>
+    </task>
+
+    <serviceTask id="Task_EnviarCotizacion" name="Enviar cotizacion formal con plazos">
+      <incoming>Flow_V01</incoming>
+      <outgoing>Flow_V02</outgoing>
+    </serviceTask>
+
+    <exclusiveGateway id="Gateway_ClienteNuevo" name="Cliente nuevo?">
+      <incoming>Flow_V02</incoming>
+      <outgoing>Flow_V03</outgoing>
+      <outgoing>Flow_V04</outgoing>
+    </exclusiveGateway>
+
+    <userTask id="Task_SolicitarReferencias" name="Solicitar referencias de diseno">
+      <incoming>Flow_V03</incoming>
+      <outgoing>Flow_V05</outgoing>
+    </userTask>
+
+    <userTask id="Task_CrearFichaTecnica" name="Crear ficha tecnica cliente">
+      <incoming>Flow_V05</incoming>
+      <outgoing>Flow_V06</outgoing>
+    </userTask>
+
+    <task id="Task_SinReferencias" name="Continuar sin referencias">
+      <incoming>Flow_V04</incoming>
+      <outgoing>Flow_V07</outgoing>
+    </task>
+
+    <exclusiveGateway id="Gateway_Merge">
+      <incoming>Flow_V06</incoming>
+      <incoming>Flow_V07</incoming>
+    </exclusiveGateway>
+
+    <sequenceFlow id="Flow_V01" sourceRef="Task_RecibirSolicitud" targetRef="Task_EnviarCotizacion"/>
+    <sequenceFlow id="Flow_V02" sourceRef="Task_EnviarCotizacion" targetRef="Gateway_ClienteNuevo"/>
+    <sequenceFlow id="Flow_V03" name="SI" sourceRef="Gateway_ClienteNuevo" targetRef="Task_SolicitarReferencias"/>
+    <sequenceFlow id="Flow_V04" name="NO" sourceRef="Gateway_ClienteNuevo" targetRef="Task_SinReferencias"/>
+    <sequenceFlow id="Flow_V05" sourceRef="Task_SolicitarReferencias" targetRef="Task_CrearFichaTecnica"/>
+    <sequenceFlow id="Flow_V06" sourceRef="Task_CrearFichaTecnica" targetRef="Gateway_Merge"/>
+    <sequenceFlow id="Flow_V07" sourceRef="Task_SinReferencias" targetRef="Gateway_Merge"/>
+  </process>
+
+  <!-- ==================== PROCESO ADMINISTRACION ==================== -->
+  <process id="Process_Admin" name="Administracion" isExecutable="false">
+    <laneSet id="LaneSet_Admin">
+      <lane id="Lane_Admin" name="Administracion">
+        <flowNodeRef>Task_ProcesarOC</flowNodeRef>
+        <flowNodeRef>Task_IngresarERP</flowNodeRef>
+        <flowNodeRef>Task_SolicitarPagoFinal</flowNodeRef>
+        <flowNodeRef>Task_GenerarFacturas</flowNodeRef>
+      </lane>
+    </laneSet>
+
+    <scriptTask id="Task_ProcesarOC" name="Procesar orden de compra">
+      <outgoing>Flow_A01</outgoing>
+    </scriptTask>
+
+    <serviceTask id="Task_IngresarERP" name="Ingresar pedido ERP Dtemite">
+      <incoming>Flow_A01</incoming>
+      <outgoing>Flow_A02</outgoing>
+    </serviceTask>
+
+    <task id="Task_SolicitarPagoFinal" name="Solicitar pago final 50%">
+      <incoming>Flow_A02</incoming>
+      <outgoing>Flow_A03</outgoing>
+    </task>
+
+    <serviceTask id="Task_GenerarFacturas" name="Generar facturas">
+      <incoming>Flow_A03</incoming>
+    </serviceTask>
+
+    <sequenceFlow id="Flow_A01" sourceRef="Task_ProcesarOC" targetRef="Task_IngresarERP"/>
+    <sequenceFlow id="Flow_A02" sourceRef="Task_IngresarERP" targetRef="Task_SolicitarPagoFinal"/>
+    <sequenceFlow id="Flow_A03" sourceRef="Task_SolicitarPagoFinal" targetRef="Task_GenerarFacturas"/>
+
+    <textAnnotation id="Annotation_M12">
+      <text>M12 - MUDA CRITICA SOBREPROCESAMIENTO
+🔴 Captura triplicada: ERP + Excel + Papel
+⏱️ Tiempo sin valor agregado
+🟡 MEJORA: Integración ERP-WMS
+💰 IMPACTO: $1-2M/año</text>
+    </textAnnotation>
+    <association id="Assoc_M12" sourceRef="Task_IngresarERP" targetRef="Annotation_M12"/>
+  </process>
+
+  <!-- ==================== PROCESO DISEÑO ==================== -->
+  <process id="Process_Diseno" name="Diseno y Bordado" isExecutable="false">
+    <laneSet id="LaneSet_Diseno">
+      <lane id="Lane_Diseno" name="Diseno y Bordado">
+        <flowNodeRef>Task_DesarrollarDiseno</flowNodeRef>
+        <flowNodeRef>Task_DesarrollarArchivos</flowNodeRef>
+        <flowNodeRef>Task_ControlCalidadDiseno</flowNodeRef>
+      </lane>
+    </laneSet>
+
+    <userTask id="Task_DesarrollarDiseno" name="Desarrollar propuestas diseno">
+      <outgoing>Flow_D01</outgoing>
+    </userTask>
+
+    <task id="Task_DesarrollarArchivos" name="Desarrollar archivos bordado">
+      <incoming>Flow_D01</incoming>
+      <outgoing>Flow_D02</outgoing>
+    </task>
+
+    <manualTask id="Task_ControlCalidadDiseno" name="Control calidad personalizacion">
+      <incoming>Flow_D02</incoming>
+    </manualTask>
+
+    <sequenceFlow id="Flow_D01" sourceRef="Task_DesarrollarDiseno" targetRef="Task_DesarrollarArchivos"/>
+    <sequenceFlow id="Flow_D02" sourceRef="Task_DesarrollarArchivos" targetRef="Task_ControlCalidadDiseno"/>
+
+    <textAnnotation id="Annotation_M11">
+      <text>M11 - MUDA ESPERA + REPROCESO
+⏱️ Espera referencias cliente
+🔄 Iteraciones por falta brief
+🟡 MEJORA: Template + banco referencias
+💰 Impacto: Retraso 3-5 días</text>
+    </textAnnotation>
+    <association id="Assoc_M11" sourceRef="Task_DesarrollarDiseno" targetRef="Annotation_M11"/>
+  </process>
+
+  <!-- ==================== PROCESO PRODUCCION ==================== -->
+  <process id="Process_Produccion" name="Produccion" isExecutable="false">
+    <laneSet id="LaneSet_Produccion">
+      <lane id="Lane_Produccion" name="Produccion">
+        <flowNodeRef>Task_ElaborarMuestras</flowNodeRef>
+        <flowNodeRef>Task_AjustarMuestras</flowNodeRef>
+        <flowNodeRef>Task_ConfeccionarSerie</flowNodeRef>
+        <flowNodeRef>Task_ControlCalidadProduccion</flowNodeRef>
+      </lane>
+    </laneSet>
+
+    <userTask id="Task_ElaborarMuestras" name="Elaborar muestras fisicas">
+      <outgoing>Flow_P01</outgoing>
+    </userTask>
+
+    <task id="Task_AjustarMuestras" name="Ajustar y corregir muestras">
+      <incoming>Flow_P01</incoming>
+      <outgoing>Flow_P02</outgoing>
+    </task>
+
+    <userTask id="Task_ConfeccionarSerie" name="Confeccionar prendas en serie">
+      <incoming>Flow_P02</incoming>
+      <outgoing>Flow_P03</outgoing>
+    </userTask>
+
+    <manualTask id="Task_ControlCalidadProduccion" name="Control calidad confeccion">
+      <incoming>Flow_P03</incoming>
+    </manualTask>
+
+    <sequenceFlow id="Flow_P01" sourceRef="Task_ElaborarMuestras" targetRef="Task_AjustarMuestras"/>
+    <sequenceFlow id="Flow_P02" sourceRef="Task_AjustarMuestras" targetRef="Task_ConfeccionarSerie"/>
+    <sequenceFlow id="Flow_P03" sourceRef="Task_ConfeccionarSerie" targetRef="Task_ControlCalidadProduccion"/>
+
+    <textAnnotation id="Annotation_M8">
+      <text>M8 - MUDA REPROCESO
+🔄 30% muestras requieren ajustes
+⏱️ Espera materiales 15-30 min
+🟡 MEJORA: Specs + kit preparado
+💰 IMPACTO: $1.5-2.5M/año</text>
+    </textAnnotation>
+    <association id="Assoc_M8" sourceRef="Task_ElaborarMuestras" targetRef="Annotation_M8"/>
+
+    <textAnnotation id="Annotation_M9">
+      <text>M9 - MUDA CRITICA MULTIPLE
+🔴 Layout no optimizado
+🏃 MOVIMIENTO innecesario
+⏱️ ESPERAS materiales/maquinas
+🔄 Defectos 3-5% sin SOP
+🟡 MEJORA: Celulas + 5S + Poka-Yoke
+💰 IMPACTO: $5.5-8.5M/año</text>
+    </textAnnotation>
+    <association id="Assoc_M9" sourceRef="Task_ConfeccionarSerie" targetRef="Annotation_M9"/>
+
+    <textAnnotation id="Annotation_M10">
+      <text>M10 - MUDA CRITICA SOBREPROCESO
+🔴 Inspecciones redundantes
+📝 Mismo producto inspeccionado multiples veces
+🟡 MEJORA: Jidoka + checklist + RACI
+💰 IMPACTO: $2-4M/año</text>
+    </textAnnotation>
+    <association id="Assoc_M10" sourceRef="Task_ControlCalidadProduccion" targetRef="Annotation_M10"/>
+  </process>
+
+  <!-- ==================== PROCESO BODEGA ==================== -->
+  <process id="Process_Bodega" name="Bodega y Logistica" isExecutable="false">
+    <laneSet id="LaneSet_Bodega">
+      <lane id="Lane_Bodega" name="Bodega y Logistica">
+        <flowNodeRef>Task_BuscarMateriales</flowNodeRef>
+        <flowNodeRef>Task_TransportarMateriales</flowNodeRef>
+        <flowNodeRef>Task_ActualizarExcel</flowNodeRef>
+        <flowNodeRef>Task_AlmacenarInventario</flowNodeRef>
+        <flowNodeRef>Task_PrepararDespacho</flowNodeRef>
+        <flowNodeRef>Task_CoordinarEntrega</flowNodeRef>
+      </lane>
+    </laneSet>
+
+    <manualTask id="Task_BuscarMateriales" name="Buscar materiales en bodega">
+      <outgoing>Flow_B01</outgoing>
+    </manualTask>
+
+    <manualTask id="Task_TransportarMateriales" name="Transportar materiales bodega a matriz">
+      <incoming>Flow_B01</incoming>
+      <outgoing>Flow_B02</outgoing>
+    </manualTask>
+
+    <scriptTask id="Task_ActualizarExcel" name="Actualizar Excel inventarios">
+      <incoming>Flow_B02</incoming>
+      <outgoing>Flow_B03</outgoing>
+    </scriptTask>
+
+    <task id="Task_AlmacenarInventario" name="Almacenar inventario clase C">
+      <incoming>Flow_B03</incoming>
+      <outgoing>Flow_B04</outgoing>
+    </task>
+
+    <manualTask id="Task_PrepararDespacho" name="Preparar pedido despacho">
+      <incoming>Flow_B04</incoming>
+      <outgoing>Flow_B05</outgoing>
+    </manualTask>
+
+    <task id="Task_CoordinarEntrega" name="Coordinar entrega cliente">
+      <incoming>Flow_B05</incoming>
+    </task>
+
+    <sequenceFlow id="Flow_B01" sourceRef="Task_BuscarMateriales" targetRef="Task_TransportarMateriales"/>
+    <sequenceFlow id="Flow_B02" sourceRef="Task_TransportarMateriales" targetRef="Task_ActualizarExcel"/>
+    <sequenceFlow id="Flow_B03" sourceRef="Task_ActualizarExcel" targetRef="Task_AlmacenarInventario"/>
+    <sequenceFlow id="Flow_B04" sourceRef="Task_AlmacenarInventario" targetRef="Task_PrepararDespacho"/>
+    <sequenceFlow id="Flow_B05" sourceRef="Task_PrepararDespacho" targetRef="Task_CoordinarEntrega"/>
+
+    <textAnnotation id="Annotation_M3">
+      <text>M3 - MUDA CRITICA MOVIMIENTO
+🔴 Busqueda 15-30 min/operario/dia
+🏃 Sin ubicaciones definidas
+⏱️ Produccion parada esperando
+🟡 MEJORA: WMS + codigo barras + 5S
+💰 IMPACTO: $2.75-3.62M/año</text>
+    </textAnnotation>
+    <association id="Assoc_M3" sourceRef="Task_BuscarMateriales" targetRef="Annotation_M3"/>
+
+    <textAnnotation id="Annotation_M4">
+      <text>M4 - MUDA CRITICA TRANSPORTE
+🔴 2-3 viajes × 30 km × 60 min
+🚚 660 horas/año perdidas
+💰 IMPACTO: $6.6M/año
+🟡 MEJORA: Consolidacion o WMS multi-sitio
+*** MUDA MAS CRITICA ***</text>
+    </textAnnotation>
+    <association id="Assoc_M4" sourceRef="Task_TransportarMateriales" targetRef="Annotation_M4"/>
+
+    <textAnnotation id="Annotation_M5">
+      <text>M5 - MUDA SOBREPROCESAMIENTO
+🔴 Captura manual Excel
+📝 Errores 15-25%
+🔄 Reproceso discrepancias
+🟡 MEJORA: WMS automatiza captura
+💰 IMPACTO: $800K-1.2M/año</text>
+    </textAnnotation>
+    <association id="Assoc_M5" sourceRef="Task_ActualizarExcel" targetRef="Annotation_M5"/>
+
+    <textAnnotation id="Annotation_M6">
+      <text>M6 - MUDA INVENTARIO EXCESIVO
+📦 $15-30M capital inmovilizado
+💰 Costo oportunidad $1.2-2.4M/año
+🏢 Espacio bodega ocupado
+🟡 MEJORA: ABC + Kanban + liquidacion C</text>
+    </textAnnotation>
+    <association id="Assoc_M6" sourceRef="Task_AlmacenarInventario" targetRef="Annotation_M6"/>
+
+    <textAnnotation id="Annotation_M7">
+      <text>M7 - MUDA ESPERA + MOVIMIENTO
+⏱️ Coordinacion telefonica reactiva
+🏃 Picking sin ruta optimizada
+🟡 MEJORA: Sistema picking + wave picking
+💰 IMPACTO: $400-700K/año</text>
+    </textAnnotation>
+    <association id="Assoc_M7" sourceRef="Task_PrepararDespacho" targetRef="Annotation_M7"/>
+  </process>
+
+  <!-- ========== BPMNDI: INFORMACION VISUAL ========== -->
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_BuzinesLean">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_Buzines">
 
-      <!-- ============================================ -->
-      <!-- POOLS DE PARTICIPANTES                       -->
-      <!-- ============================================ -->
-
-      <bpmndi:BPMNShape id="Shape_Participant_Cliente" bpmnElement="Participant_Cliente" isHorizontal="true">
-        <dc:Bounds x="160" y="80" width="2400" height="350"/>
+      <!-- LEYENDA (parte superior derecha) -->
+      <bpmndi:BPMNShape id="Shape_Leyenda" bpmnElement="Annotation_Leyenda">
+        <omgdc:Bounds x="2300" y="50" width="400" height="200"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Participant_Ventas" bpmnElement="Participant_Ventas" isHorizontal="true">
-        <dc:Bounds x="160" y="450" width="2400" height="200"/>
+      <!-- RESUMEN (parte inferior derecha) -->
+      <bpmndi:BPMNShape id="Shape_Resumen" bpmnElement="Annotation_Resumen">
+        <omgdc:Bounds x="2300" y="1350" width="400" height="200"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Participant_Admin" bpmnElement="Participant_Admin" isHorizontal="true">
-        <dc:Bounds x="160" y="670" width="2400" height="250"/>
+      <!-- ============ LANE CLIENTE ============ -->
+      <bpmndi:BPMNShape id="Shape_Lane_Cliente" bpmnElement="Participant_Cliente" isHorizontal="true">
+        <omgdc:Bounds x="80" y="250" width="2600" height="180"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Participant_Diseno" bpmnElement="Participant_Diseno" isHorizontal="true">
-        <dc:Bounds x="160" y="940" width="2400" height="200"/>
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Event_Start">
+        <omgdc:Bounds x="160" y="322" width="36" height="36"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Participant_Produccion" bpmnElement="Participant_Produccion" isHorizontal="true">
-        <dc:Bounds x="160" y="1160" width="2400" height="400"/>
+      <bpmndi:BPMNShape id="Shape_Task_RecibirCot" bpmnElement="Task_RecibirCotizacion">
+        <omgdc:Bounds x="270" y="300" width="120" height="80"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Participant_Bodega" bpmnElement="Participant_Bodega" isHorizontal="true">
-        <dc:Bounds x="160" y="1580" width="2400" height="450"/>
+      <bpmndi:BPMNShape id="Shape_Task_AprobarDis" bpmnElement="Task_AprobarDiseno">
+        <omgdc:Bounds x="470" y="300" width="120" height="80"/>
       </bpmndi:BPMNShape>
 
-      <!-- ============================================ -->
-      <!-- PROCESO CLIENTE - SHAPES                     -->
-      <!-- ============================================ -->
-
-      <bpmndi:BPMNShape id="Shape_Start_SolicitudPedido" bpmnElement="Start_SolicitudPedido">
-        <dc:Bounds x="250" y="230" width="36" height="36"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="230" y="273" width="80" height="27"/>
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNShape id="Shape_Annotation_M1" bpmnElement="Annotation_M1">
+        <omgdc:Bounds x="620" y="260" width="200" height="80"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Task_RecibirCotizacion" bpmnElement="Task_RecibirCotizacion">
-        <dc:Bounds x="710" y="208" width="120" height="80"/>
+      <bpmndi:BPMNShape id="Shape_Task_PagoIni" bpmnElement="Task_PagoInicial">
+        <omgdc:Bounds x="870" y="300" width="120" height="80"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Task_AprobarDiseno" bpmnElement="Task_AprobarDiseno">
-        <dc:Bounds x="1050" y="208" width="120" height="80"/>
+      <bpmndi:BPMNShape id="Shape_Task_AprobarMue" bpmnElement="Task_AprobarMuestra">
+        <omgdc:Bounds x="1070" y="300" width="120" height="80"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Task_PagoInicial" bpmnElement="Task_PagoInicial">
-        <dc:Bounds x="1220" y="208" width="120" height="80"/>
+      <bpmndi:BPMNShape id="Shape_Annotation_M2" bpmnElement="Annotation_M2">
+        <omgdc:Bounds x="1220" y="250" width="220" height="90"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Task_AprobarMuestra" bpmnElement="Task_AprobarMuestra">
-        <dc:Bounds x="1680" y="208" width="120" height="80"/>
+      <bpmndi:BPMNShape id="Shape_Task_PagoFin" bpmnElement="Task_PagoFinal">
+        <omgdc:Bounds x="1520" y="300" width="120" height="80"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Task_PagoFinal" bpmnElement="Task_PagoFinal">
-        <dc:Bounds x="2020" y="208" width="120" height="80"/>
+      <bpmndi:BPMNShape id="Shape_Task_RecibirProd" bpmnElement="Task_RecibirProducto">
+        <omgdc:Bounds x="1720" y="300" width="120" height="80"/>
       </bpmndi:BPMNShape>
 
-      <bpmndi:BPMNShape id="Shape_Task_RecibirProducto" bpmnElement="Task_RecibirProducto">
-        <dc:Bounds x="2260" y="208" width="120" height="80"/>
+      <bpmndi:BPMNShape id="Shape_End" bpmnElement="Event_End">
+        <omgdc:Bounds x="1920" y="322" width="36" height="36"/>
       </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_End_ClienteSatisfecho" bpmnElement="End_ClienteSatisfecho">
-        <dc:Bounds x="2440" y="230" width="36" height="36"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2430" y="273" width="58" height="27"/>
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda1" bpmnElement="Annotation_Muda1">
-        <dc:Bounds x="1000" y="320" width="220" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda2" bpmnElement="Annotation_Muda2">
-        <dc:Bounds x="1600" y="320" width="250" height="90"/>
-      </bpmndi:BPMNShape>
-
-      <!-- ============================================ -->
-      <!-- PROCESO VENTAS - SHAPES                      -->
-      <!-- ============================================ -->
-
-      <bpmndi:BPMNShape id="Shape_Task_RecibirSolicitud" bpmnElement="Task_RecibirSolicitud">
-        <dc:Bounds x="350" y="510" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_PrepararCotizacion" bpmnElement="Task_PrepararCotizacion">
-        <dc:Bounds x="520" y="510" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_EnviarCotizacion" bpmnElement="Task_EnviarCotizacion">
-        <dc:Bounds x="690" y="510" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_SolicitarDiseno" bpmnElement="Task_SolicitarDiseno">
-        <dc:Bounds x="860" y="510" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_RecibirAprobacion" bpmnElement="Task_RecibirAprobacion">
-        <dc:Bounds x="1050" y="510" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_CoordinarProduccion" bpmnElement="Task_CoordinarProduccion">
-        <dc:Bounds x="1220" y="510" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <!-- ============================================ -->
-      <!-- PROCESO ADMINISTRACIÓN - SHAPES              -->
-      <!-- ============================================ -->
-
-      <bpmndi:BPMNShape id="Shape_Task_RegistrarPago" bpmnElement="Task_RegistrarPago">
-        <dc:Bounds x="1220" y="740" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_IngresarERPDtemite" bpmnElement="Task_IngresarERPDtemite">
-        <dc:Bounds x="1390" y="740" width="150" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_OrdenProduccion" bpmnElement="Task_OrdenProduccion">
-        <dc:Bounds x="1590" y="740" width="130" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_ConfirmarProduccion" bpmnElement="Task_ConfirmarProduccion">
-        <dc:Bounds x="1770" y="740" width="130" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_RegistrarPagoFinal" bpmnElement="Task_RegistrarPagoFinal">
-        <dc:Bounds x="2020" y="740" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_AutorizarDespacho" bpmnElement="Task_AutorizarDespacho">
-        <dc:Bounds x="2190" y="740" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda12" bpmnElement="Annotation_Muda12">
-        <dc:Bounds x="1360" y="840" width="210" height="70"/>
-      </bpmndi:BPMNShape>
-
-      <!-- ============================================ -->
-      <!-- PROCESO DISEÑO - SHAPES                      -->
-      <!-- ============================================ -->
-
-      <bpmndi:BPMNShape id="Shape_Task_DesarrollarDiseno" bpmnElement="Task_DesarrollarDiseno">
-        <dc:Bounds x="860" y="1010" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_PrepararArchivos" bpmnElement="Task_PrepararArchivos">
-        <dc:Bounds x="1050" y="1010" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_ProgramarBordado" bpmnElement="Task_ProgramarBordado">
-        <dc:Bounds x="1240" y="1010" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda11" bpmnElement="Annotation_Muda11">
-        <dc:Bounds x="820" y="1110" width="220" height="60"/>
-      </bpmndi:BPMNShape>
-
-      <!-- ============================================ -->
-      <!-- PROCESO PRODUCCIÓN - SHAPES                  -->
-      <!-- ============================================ -->
-
-      <bpmndi:BPMNShape id="Shape_Task_SolicitarMateriales" bpmnElement="Task_SolicitarMateriales">
-        <dc:Bounds x="1390" y="1260" width="130" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_RecibirMateriales" bpmnElement="Task_RecibirMateriales">
-        <dc:Bounds x="1000" y="1260" width="130" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_ElaborarMuestras" bpmnElement="Task_ElaborarMuestras">
-        <dc:Bounds x="1570" y="1260" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_Confeccionar" bpmnElement="Task_Confeccionar">
-        <dc:Bounds x="1760" y="1260" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_ControlCalidad" bpmnElement="Task_ControlCalidad">
-        <dc:Bounds x="1950" y="1260" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_EmpaquetarProducto" bpmnElement="Task_EmpaquetarProducto">
-        <dc:Bounds x="2140" y="1260" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_EnviarBodega" bpmnElement="Task_EnviarBodega">
-        <dc:Bounds x="2330" y="1260" width="120" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda8" bpmnElement="Annotation_Muda8">
-        <dc:Bounds x="1530" y="1380" width="220" height="70"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda9" bpmnElement="Annotation_Muda9">
-        <dc:Bounds x="1710" y="1380" width="240" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda10" bpmnElement="Annotation_Muda10">
-        <dc:Bounds x="1920" y="1380" width="220" height="70"/>
-      </bpmndi:BPMNShape>
-
-      <!-- ============================================ -->
-      <!-- PROCESO BODEGA - SHAPES                      -->
-      <!-- ============================================ -->
-
-      <bpmndi:BPMNShape id="Shape_Task_BuscarMateriales" bpmnElement="Task_BuscarMateriales">
-        <dc:Bounds x="730" y="1690" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_TransporteBodegaCasaMatriz" bpmnElement="Task_TransporteBodegaCasaMatriz">
-        <dc:Bounds x="920" y="1690" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_ControlInventarioManual" bpmnElement="Task_ControlInventarioManual">
-        <dc:Bounds x="1110" y="1690" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_EntregarMateriales" bpmnElement="Task_EntregarMateriales">
-        <dc:Bounds x="1300" y="1690" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_RecibirProductoTerminado" bpmnElement="Task_RecibirProductoTerminado">
-        <dc:Bounds x="2140" y="1690" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_InventarioExcesivo" bpmnElement="Task_InventarioExcesivo">
-        <dc:Bounds x="1700" y="1690" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Task_PrepararDespacho" bpmnElement="Task_PrepararDespacho">
-        <dc:Bounds x="2020" y="1690" width="140" height="80"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda3" bpmnElement="Annotation_Muda3">
-        <dc:Bounds x="680" y="1810" width="240" height="90"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda4" bpmnElement="Annotation_Muda4">
-        <dc:Bounds x="850" y="1810" width="280" height="90"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda5" bpmnElement="Annotation_Muda5">
-        <dc:Bounds x="1050" y="1810" width="260" height="90"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda6" bpmnElement="Annotation_Muda6">
-        <dc:Bounds x="1620" y="1810" width="300" height="100"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Muda7" bpmnElement="Annotation_Muda7">
-        <dc:Bounds x="1950" y="1810" width="260" height="70"/>
-      </bpmndi:BPMNShape>
-
-      <bpmndi:BPMNShape id="Shape_Annotation_Lean_Legend" bpmnElement="Annotation_Lean_Legend">
-        <dc:Bounds x="350" y="1700" width="320" height="150"/>
-      </bpmndi:BPMNShape>
-
-      <!-- ============================================ -->
-      <!-- EDGES - SEQUENCE FLOWS                       -->
-      <!-- ============================================ -->
 
       <!-- Cliente Flows -->
-      <bpmndi:BPMNEdge id="Edge_Flow_C01" bpmnElement="Flow_C01">
-        <di:waypoint x="286" y="248"/>
-        <di:waypoint x="710" y="248"/>
+      <bpmndi:BPMNEdge id="Edge_C01" bpmnElement="Flow_C01">
+        <omgdi:waypoint x="196" y="340"/>
+        <omgdi:waypoint x="270" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_C02" bpmnElement="Flow_C02">
+        <omgdi:waypoint x="390" y="340"/>
+        <omgdi:waypoint x="470" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_C03" bpmnElement="Flow_C03">
+        <omgdi:waypoint x="590" y="340"/>
+        <omgdi:waypoint x="870" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_C04" bpmnElement="Flow_C04">
+        <omgdi:waypoint x="990" y="340"/>
+        <omgdi:waypoint x="1070" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_C05" bpmnElement="Flow_C05">
+        <omgdi:waypoint x="1190" y="340"/>
+        <omgdi:waypoint x="1520" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_C06" bpmnElement="Flow_C06">
+        <omgdi:waypoint x="1640" y="340"/>
+        <omgdi:waypoint x="1720" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_C07" bpmnElement="Flow_C07">
+        <omgdi:waypoint x="1840" y="340"/>
+        <omgdi:waypoint x="1920" y="340"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_C02" bpmnElement="Flow_C02">
-        <di:waypoint x="830" y="248"/>
-        <di:waypoint x="1050" y="248"/>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M1" bpmnElement="Assoc_M1">
+        <omgdi:waypoint x="590" y="320"/>
+        <omgdi:waypoint x="620" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M2" bpmnElement="Assoc_M2">
+        <omgdi:waypoint x="1190" y="320"/>
+        <omgdi:waypoint x="1220" y="295"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_C03" bpmnElement="Flow_C03">
-        <di:waypoint x="1170" y="248"/>
-        <di:waypoint x="1220" y="248"/>
+      <!-- ============ LANE VENTAS ============ -->
+      <bpmndi:BPMNShape id="Shape_Lane_Ventas" bpmnElement="Participant_Ventas" isHorizontal="true">
+        <omgdc:Bounds x="80" y="450" width="2600" height="220"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_RecibirSol" bpmnElement="Task_RecibirSolicitud">
+        <omgdc:Bounds x="160" y="520" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_EnviarCot" bpmnElement="Task_EnviarCotizacion">
+        <omgdc:Bounds x="340" y="520" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Gateway_Nuevo" bpmnElement="Gateway_ClienteNuevo" isMarkerVisible="true">
+        <omgdc:Bounds x="520" y="535" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_SolRef" bpmnElement="Task_SolicitarReferencias">
+        <omgdc:Bounds x="630" y="490" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_CrearFicha" bpmnElement="Task_CrearFichaTecnica">
+        <omgdc:Bounds x="800" y="490" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_SinRef" bpmnElement="Task_SinReferencias">
+        <omgdc:Bounds x="630" y="600" width="120" height="60"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Gateway_Merge" bpmnElement="Gateway_Merge" isMarkerVisible="true">
+        <omgdc:Bounds x="970" y="535" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_V01" bpmnElement="Flow_V01">
+        <omgdi:waypoint x="280" y="560"/>
+        <omgdi:waypoint x="340" y="560"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_V02" bpmnElement="Flow_V02">
+        <omgdi:waypoint x="460" y="560"/>
+        <omgdi:waypoint x="520" y="560"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_V03" bpmnElement="Flow_V03">
+        <omgdi:waypoint x="570" y="545"/>
+        <omgdi:waypoint x="630" y="530"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_V04" bpmnElement="Flow_V04">
+        <omgdi:waypoint x="545" y="585"/>
+        <omgdi:waypoint x="545" y="630"/>
+        <omgdi:waypoint x="630" y="630"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_V05" bpmnElement="Flow_V05">
+        <omgdi:waypoint x="750" y="530"/>
+        <omgdi:waypoint x="800" y="530"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_V06" bpmnElement="Flow_V06">
+        <omgdi:waypoint x="920" y="530"/>
+        <omgdi:waypoint x="970" y="545"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_V07" bpmnElement="Flow_V07">
+        <omgdi:waypoint x="750" y="630"/>
+        <omgdi:waypoint x="995" y="630"/>
+        <omgdi:waypoint x="995" y="585"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_C04" bpmnElement="Flow_C04">
-        <di:waypoint x="1340" y="248"/>
-        <di:waypoint x="1680" y="248"/>
+      <!-- ============ LANE ADMINISTRACION ============ -->
+      <bpmndi:BPMNShape id="Shape_Lane_Admin" bpmnElement="Participant_Admin" isHorizontal="true">
+        <omgdc:Bounds x="80" y="690" width="2600" height="200"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_ProcesarOC" bpmnElement="Task_ProcesarOC">
+        <omgdc:Bounds x="870" y="750" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_IngresarERP" bpmnElement="Task_IngresarERP">
+        <omgdc:Bounds x="1070" y="750" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Annotation_M12" bpmnElement="Annotation_M12">
+        <omgdc:Bounds x="1220" y="730" width="220" height="100"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_SolPago" bpmnElement="Task_SolicitarPagoFinal">
+        <omgdc:Bounds x="1320" y="750" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_GenFact" bpmnElement="Task_GenerarFacturas">
+        <omgdc:Bounds x="1520" y="750" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_A01" bpmnElement="Flow_A01">
+        <omgdi:waypoint x="990" y="790"/>
+        <omgdi:waypoint x="1070" y="790"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_A02" bpmnElement="Flow_A02">
+        <omgdi:waypoint x="1190" y="790"/>
+        <omgdi:waypoint x="1320" y="790"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_A03" bpmnElement="Flow_A03">
+        <omgdi:waypoint x="1440" y="790"/>
+        <omgdi:waypoint x="1520" y="790"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_C05" bpmnElement="Flow_C05">
-        <di:waypoint x="1800" y="248"/>
-        <di:waypoint x="2020" y="248"/>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M12" bpmnElement="Assoc_M12">
+        <omgdi:waypoint x="1190" y="770"/>
+        <omgdi:waypoint x="1220" y="760"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_C06" bpmnElement="Flow_C06">
-        <di:waypoint x="2140" y="248"/>
-        <di:waypoint x="2260" y="248"/>
+      <!-- ============ LANE DISEÑO ============ -->
+      <bpmndi:BPMNShape id="Shape_Lane_Diseno" bpmnElement="Participant_Diseno" isHorizontal="true">
+        <omgdc:Bounds x="80" y="910" width="2600" height="200"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_DesDis" bpmnElement="Task_DesarrollarDiseno">
+        <omgdc:Bounds x="630" y="970" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Annotation_M11" bpmnElement="Annotation_M11">
+        <omgdc:Bounds x="780" y="960" width="200" height="90"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_DesArch" bpmnElement="Task_DesarrollarArchivos">
+        <omgdc:Bounds x="1070" y="970" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_ControlDis" bpmnElement="Task_ControlCalidadDiseno">
+        <omgdc:Bounds x="1270" y="970" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_D01" bpmnElement="Flow_D01">
+        <omgdi:waypoint x="750" y="1010"/>
+        <omgdi:waypoint x="1070" y="1010"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_D02" bpmnElement="Flow_D02">
+        <omgdi:waypoint x="1190" y="1010"/>
+        <omgdi:waypoint x="1270" y="1010"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_C07" bpmnElement="Flow_C07">
-        <di:waypoint x="2380" y="248"/>
-        <di:waypoint x="2440" y="248"/>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M11" bpmnElement="Assoc_M11">
+        <omgdi:waypoint x="750" y="990"/>
+        <omgdi:waypoint x="780" y="1005"/>
       </bpmndi:BPMNEdge>
 
-      <!-- Ventas Flows -->
-      <bpmndi:BPMNEdge id="Edge_Flow_V01" bpmnElement="Flow_V01">
-        <di:waypoint x="470" y="550"/>
-        <di:waypoint x="520" y="550"/>
+      <!-- ============ LANE PRODUCCION ============ -->
+      <bpmndi:BPMNShape id="Shape_Lane_Prod" bpmnElement="Participant_Produccion" isHorizontal="true">
+        <omgdc:Bounds x="80" y="1130" width="2600" height="220"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_ElabMue" bpmnElement="Task_ElaborarMuestras">
+        <omgdc:Bounds x="870" y="1190" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Annotation_M8" bpmnElement="Annotation_M8">
+        <omgdc:Bounds x="820" y="1290" width="200" height="90"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_AjuMue" bpmnElement="Task_AjustarMuestras">
+        <omgdc:Bounds x="1070" y="1190" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_Confec" bpmnElement="Task_ConfeccionarSerie">
+        <omgdc:Bounds x="1270" y="1190" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Annotation_M9" bpmnElement="Annotation_M9">
+        <omgdc:Bounds x="1220" y="1290" width="220" height="110"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_ControlProd" bpmnElement="Task_ControlCalidadProduccion">
+        <omgdc:Bounds x="1500" y="1190" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Annotation_M10" bpmnElement="Annotation_M10">
+        <omgdc:Bounds x="1460" y="1290" width="220" height="90"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_P01" bpmnElement="Flow_P01">
+        <omgdi:waypoint x="990" y="1230"/>
+        <omgdi:waypoint x="1070" y="1230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_P02" bpmnElement="Flow_P02">
+        <omgdi:waypoint x="1190" y="1230"/>
+        <omgdi:waypoint x="1270" y="1230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_P03" bpmnElement="Flow_P03">
+        <omgdi:waypoint x="1390" y="1230"/>
+        <omgdi:waypoint x="1500" y="1230"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_V02" bpmnElement="Flow_V02">
-        <di:waypoint x="640" y="550"/>
-        <di:waypoint x="690" y="550"/>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M8" bpmnElement="Assoc_M8">
+        <omgdi:waypoint x="930" y="1270"/>
+        <omgdi:waypoint x="920" y="1290"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M9" bpmnElement="Assoc_M9">
+        <omgdi:waypoint x="1330" y="1270"/>
+        <omgdi:waypoint x="1330" y="1290"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M10" bpmnElement="Assoc_M10">
+        <omgdi:waypoint x="1560" y="1270"/>
+        <omgdi:waypoint x="1570" y="1290"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_V03" bpmnElement="Flow_V03">
-        <di:waypoint x="810" y="550"/>
-        <di:waypoint x="860" y="550"/>
+      <!-- ============ LANE BODEGA ============ -->
+      <bpmndi:BPMNShape id="Shape_Lane_Bodega" bpmnElement="Participant_Bodega" isHorizontal="true">
+        <omgdc:Bounds x="80" y="1370" width="2600" height="250"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_BuscarMat" bpmnElement="Task_BuscarMateriales">
+        <omgdc:Bounds x="630" y="1440" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Annotation_M3" bpmnElement="Annotation_M3">
+        <omgdc:Bounds x="580" y="1540" width="200" height="100"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_TranspMat" bpmnElement="Task_TransportarMateriales">
+        <omgdc:Bounds x="820" y="1440" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Annotation_M4" bpmnElement="Annotation_M4">
+        <omgdc:Bounds x="750" y="1540" width="240" height="110"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_ActExcel" bpmnElement="Task_ActualizarExcel">
+        <omgdc:Bounds x="1010" y="1440" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Annotation_M5" bpmnElement="Annotation_M5">
+        <omgdc:Bounds x="970" y="1540" width="200" height="90"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_AlmInv" bpmnElement="Task_AlmacenarInventario">
+        <omgdc:Bounds x="1200" y="1440" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Annotation_M6" bpmnElement="Annotation_M6">
+        <omgdc:Bounds x="1150" y="1540" width="220" height="90"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_PrepDesp" bpmnElement="Task_PrepararDespacho">
+        <omgdc:Bounds x="1390" y="1440" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Annotation_M7" bpmnElement="Annotation_M7">
+        <omgdc:Bounds x="1350" y="1540" width="200" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_CoordEnt" bpmnElement="Task_CoordinarEntrega">
+        <omgdc:Bounds x="1580" y="1440" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_B01" bpmnElement="Flow_B01">
+        <omgdi:waypoint x="750" y="1480"/>
+        <omgdi:waypoint x="820" y="1480"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_B02" bpmnElement="Flow_B02">
+        <omgdi:waypoint x="940" y="1480"/>
+        <omgdi:waypoint x="1010" y="1480"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_B03" bpmnElement="Flow_B03">
+        <omgdi:waypoint x="1130" y="1480"/>
+        <omgdi:waypoint x="1200" y="1480"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_B04" bpmnElement="Flow_B04">
+        <omgdi:waypoint x="1320" y="1480"/>
+        <omgdi:waypoint x="1390" y="1480"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_B05" bpmnElement="Flow_B05">
+        <omgdi:waypoint x="1510" y="1480"/>
+        <omgdi:waypoint x="1580" y="1480"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_V04" bpmnElement="Flow_V04">
-        <di:waypoint x="980" y="550"/>
-        <di:waypoint x="1050" y="550"/>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M3" bpmnElement="Assoc_M3">
+        <omgdi:waypoint x="690" y="1520"/>
+        <omgdi:waypoint x="680" y="1540"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M4" bpmnElement="Assoc_M4">
+        <omgdi:waypoint x="880" y="1520"/>
+        <omgdi:waypoint x="870" y="1540"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M5" bpmnElement="Assoc_M5">
+        <omgdi:waypoint x="1070" y="1520"/>
+        <omgdi:waypoint x="1070" y="1540"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M6" bpmnElement="Assoc_M6">
+        <omgdi:waypoint x="1260" y="1520"/>
+        <omgdi:waypoint x="1260" y="1540"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_M7" bpmnElement="Assoc_M7">
+        <omgdi:waypoint x="1450" y="1520"/>
+        <omgdi:waypoint x="1450" y="1540"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_V05" bpmnElement="Flow_V05">
-        <di:waypoint x="1170" y="550"/>
-        <di:waypoint x="1220" y="550"/>
+      <!-- ============ MESSAGE FLOWS (flechas punteadas entre pools) ============ -->
+
+      <!-- 1. Cliente → Ventas -->
+      <bpmndi:BPMNEdge id="Edge_Msg01" bpmnElement="MsgFlow_01">
+        <omgdi:waypoint x="178" y="358"/>
+        <omgdi:waypoint x="178" y="520"/>
       </bpmndi:BPMNEdge>
 
-      <!-- Admin Flows -->
-      <bpmndi:BPMNEdge id="Edge_Flow_A01" bpmnElement="Flow_A01">
-        <di:waypoint x="1340" y="780"/>
-        <di:waypoint x="1390" y="780"/>
+      <!-- 2. Ventas → Cliente -->
+      <bpmndi:BPMNEdge id="Edge_Msg02" bpmnElement="MsgFlow_02">
+        <omgdi:waypoint x="360" y="520"/>
+        <omgdi:waypoint x="310" y="380"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_A02" bpmnElement="Flow_A02">
-        <di:waypoint x="1540" y="780"/>
-        <di:waypoint x="1590" y="780"/>
+      <!-- 3. Ventas → Diseño -->
+      <bpmndi:BPMNEdge id="Edge_Msg03" bpmnElement="MsgFlow_03">
+        <omgdi:waypoint x="690" y="670"/>
+        <omgdi:waypoint x="690" y="970"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_A03" bpmnElement="Flow_A03">
-        <di:waypoint x="1720" y="780"/>
-        <di:waypoint x="1770" y="780"/>
+      <!-- 4. Diseño → Cliente -->
+      <bpmndi:BPMNEdge id="Edge_Msg04" bpmnElement="MsgFlow_04">
+        <omgdi:waypoint x="1330" y="970"/>
+        <omgdi:waypoint x="530" y="380"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_A04" bpmnElement="Flow_A04">
-        <di:waypoint x="1900" y="780"/>
-        <di:waypoint x="2020" y="780"/>
+      <!-- 5. Cliente → Ventas -->
+      <bpmndi:BPMNEdge id="Edge_Msg05" bpmnElement="MsgFlow_05">
+        <omgdi:waypoint x="530" y="380"/>
+        <omgdi:waypoint x="545" y="535"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_A05" bpmnElement="Flow_A05">
-        <di:waypoint x="2140" y="780"/>
-        <di:waypoint x="2190" y="780"/>
+      <!-- 6. Cliente → Admin -->
+      <bpmndi:BPMNEdge id="Edge_Msg06" bpmnElement="MsgFlow_06">
+        <omgdi:waypoint x="930" y="380"/>
+        <omgdi:waypoint x="930" y="750"/>
       </bpmndi:BPMNEdge>
 
-      <!-- Diseño Flows -->
-      <bpmndi:BPMNEdge id="Edge_Flow_D01" bpmnElement="Flow_D01">
-        <di:waypoint x="1000" y="1050"/>
-        <di:waypoint x="1050" y="1050"/>
+      <!-- 7. Admin → Producción -->
+      <bpmndi:BPMNEdge id="Edge_Msg07" bpmnElement="MsgFlow_07">
+        <omgdi:waypoint x="1130" y="830"/>
+        <omgdi:waypoint x="930" y="1190"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_D02" bpmnElement="Flow_D02">
-        <di:waypoint x="1190" y="1050"/>
-        <di:waypoint x="1240" y="1050"/>
+      <!-- 8. Producción → Bodega -->
+      <bpmndi:BPMNEdge id="Edge_Msg08" bpmnElement="MsgFlow_08">
+        <omgdi:waypoint x="870" y="1230"/>
+        <omgdi:waypoint x="690" y="1440"/>
       </bpmndi:BPMNEdge>
 
-      <!-- Producción Flows -->
-      <bpmndi:BPMNEdge id="Edge_Flow_P01" bpmnElement="Flow_P01">
-        <di:waypoint x="1390" y="1300"/>
-        <di:waypoint x="1130" y="1300"/>
+      <!-- 9. Bodega → Producción -->
+      <bpmndi:BPMNEdge id="Edge_Msg09" bpmnElement="MsgFlow_09">
+        <omgdi:waypoint x="940" y="1440"/>
+        <omgdi:waypoint x="1130" y="1270"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_P02" bpmnElement="Flow_P02">
-        <di:waypoint x="1130" y="1300"/>
-        <di:waypoint x="1570" y="1300"/>
+      <!-- 10. Producción → Cliente -->
+      <bpmndi:BPMNEdge id="Edge_Msg10" bpmnElement="MsgFlow_10">
+        <omgdi:waypoint x="1130" y="1190"/>
+        <omgdi:waypoint x="1130" y="380"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_P03" bpmnElement="Flow_P03">
-        <di:waypoint x="1710" y="1300"/>
-        <di:waypoint x="1760" y="1300"/>
+      <!-- 11. Cliente → Admin -->
+      <bpmndi:BPMNEdge id="Edge_Msg11" bpmnElement="MsgFlow_11">
+        <omgdi:waypoint x="1190" y="380"/>
+        <omgdi:waypoint x="1380" y="750"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_P04" bpmnElement="Flow_P04">
-        <di:waypoint x="1900" y="1300"/>
-        <di:waypoint x="1950" y="1300"/>
+      <!-- 12. Cliente → Admin -->
+      <bpmndi:BPMNEdge id="Edge_Msg12" bpmnElement="MsgFlow_12">
+        <omgdi:waypoint x="1580" y="380"/>
+        <omgdi:waypoint x="1580" y="750"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_P05" bpmnElement="Flow_P05">
-        <di:waypoint x="2090" y="1300"/>
-        <di:waypoint x="2140" y="1300"/>
+      <!-- 13. Producción → Bodega -->
+      <bpmndi:BPMNEdge id="Edge_Msg13" bpmnElement="MsgFlow_13">
+        <omgdi:waypoint x="1560" y="1270"/>
+        <omgdi:waypoint x="1260" y="1440"/>
       </bpmndi:BPMNEdge>
 
-      <bpmndi:BPMNEdge id="Edge_Flow_P06" bpmnElement="Flow_P06">
-        <di:waypoint x="2280" y="1300"/>
-        <di:waypoint x="2330" y="1300"/>
-      </bpmndi:BPMNEdge>
-
-      <!-- Bodega Flows -->
-      <bpmndi:BPMNEdge id="Edge_Flow_B01" bpmnElement="Flow_B01">
-        <di:waypoint x="870" y="1730"/>
-        <di:waypoint x="920" y="1730"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Flow_B02" bpmnElement="Flow_B02">
-        <di:waypoint x="1060" y="1730"/>
-        <di:waypoint x="1110" y="1730"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Flow_B03" bpmnElement="Flow_B03">
-        <di:waypoint x="1250" y="1730"/>
-        <di:waypoint x="1300" y="1730"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Flow_B04" bpmnElement="Flow_B04">
-        <di:waypoint x="1440" y="1730"/>
-        <di:waypoint x="2140" y="1730"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Flow_B05" bpmnElement="Flow_B05">
-        <di:waypoint x="2140" y="1730"/>
-        <di:waypoint x="1840" y="1730"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Flow_B06" bpmnElement="Flow_B06">
-        <di:waypoint x="1840" y="1730"/>
-        <di:waypoint x="2020" y="1730"/>
-      </bpmndi:BPMNEdge>
-
-      <!-- ============================================ -->
-      <!-- EDGES - MESSAGE FLOWS                        -->
-      <!-- ============================================ -->
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_01" bpmnElement="MsgFlow_01">
-        <di:waypoint x="268" y="266"/>
-        <di:waypoint x="268" y="550"/>
-        <di:waypoint x="350" y="550"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="270" y="400" width="80" height="14"/>
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_02" bpmnElement="MsgFlow_02">
-        <di:waypoint x="750" y="510"/>
-        <di:waypoint x="750" y="288"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_03" bpmnElement="MsgFlow_03">
-        <di:waypoint x="1110" y="288"/>
-        <di:waypoint x="1110" y="510"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_04" bpmnElement="MsgFlow_04">
-        <di:waypoint x="920" y="590"/>
-        <di:waypoint x="920" y="1010"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_05" bpmnElement="MsgFlow_05">
-        <di:waypoint x="930" y="1010"/>
-        <di:waypoint x="930" y="800"/>
-        <di:waypoint x="1050" y="800"/>
-        <di:waypoint x="1050" y="288"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_06" bpmnElement="MsgFlow_06">
-        <di:waypoint x="1280" y="288"/>
-        <di:waypoint x="1280" y="740"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_07" bpmnElement="MsgFlow_07">
-        <di:waypoint x="1655" y="820"/>
-        <di:waypoint x="1655" y="1040"/>
-        <di:waypoint x="1640" y="1040"/>
-        <di:waypoint x="1640" y="1260"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_08" bpmnElement="MsgFlow_08">
-        <di:waypoint x="1640" y="1260"/>
-        <di:waypoint x="1640" y="900"/>
-        <di:waypoint x="1740" y="900"/>
-        <di:waypoint x="1740" y="288"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_09" bpmnElement="MsgFlow_09">
-        <di:waypoint x="1740" y="288"/>
-        <di:waypoint x="1740" y="900"/>
-        <di:waypoint x="1835" y="900"/>
-        <di:waypoint x="1835" y="740"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_10" bpmnElement="MsgFlow_10">
-        <di:waypoint x="2080" y="288"/>
-        <di:waypoint x="2080" y="740"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_11" bpmnElement="MsgFlow_11">
-        <di:waypoint x="1455" y="1340"/>
-        <di:waypoint x="1455" y="1535"/>
-        <di:waypoint x="800" y="1535"/>
-        <di:waypoint x="800" y="1690"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_MsgFlow_12" bpmnElement="MsgFlow_12">
-        <di:waypoint x="2160" y="1690"/>
-        <di:waypoint x="2160" y="1500"/>
-        <di:waypoint x="2320" y="1500"/>
-        <di:waypoint x="2320" y="288"/>
-      </bpmndi:BPMNEdge>
-
-      <!-- ============================================ -->
-      <!-- EDGES - ASSOCIATIONS                         -->
-      <!-- ============================================ -->
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda1" bpmnElement="Association_Muda1">
-        <di:waypoint x="1110" y="288"/>
-        <di:waypoint x="1110" y="320"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda2" bpmnElement="Association_Muda2">
-        <di:waypoint x="1740" y="288"/>
-        <di:waypoint x="1725" y="320"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda12" bpmnElement="Association_Muda12">
-        <di:waypoint x="1465" y="820"/>
-        <di:waypoint x="1465" y="840"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda11" bpmnElement="Association_Muda11">
-        <di:waypoint x="930" y="1090"/>
-        <di:waypoint x="930" y="1110"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda8" bpmnElement="Association_Muda8">
-        <di:waypoint x="1640" y="1340"/>
-        <di:waypoint x="1640" y="1380"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda9" bpmnElement="Association_Muda9">
-        <di:waypoint x="1830" y="1340"/>
-        <di:waypoint x="1830" y="1380"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda10" bpmnElement="Association_Muda10">
-        <di:waypoint x="2020" y="1340"/>
-        <di:waypoint x="2030" y="1380"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda3" bpmnElement="Association_Muda3">
-        <di:waypoint x="800" y="1770"/>
-        <di:waypoint x="800" y="1810"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda4" bpmnElement="Association_Muda4">
-        <di:waypoint x="990" y="1770"/>
-        <di:waypoint x="990" y="1810"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda5" bpmnElement="Association_Muda5">
-        <di:waypoint x="1180" y="1770"/>
-        <di:waypoint x="1180" y="1810"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda6" bpmnElement="Association_Muda6">
-        <di:waypoint x="1770" y="1770"/>
-        <di:waypoint x="1770" y="1810"/>
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Edge_Association_Muda7" bpmnElement="Association_Muda7">
-        <di:waypoint x="2090" y="1770"/>
-        <di:waypoint x="2080" y="1810"/>
+      <!-- 14. Bodega → Cliente -->
+      <bpmndi:BPMNEdge id="Edge_Msg14" bpmnElement="MsgFlow_14">
+        <omgdi:waypoint x="1640" y="1440"/>
+        <omgdi:waypoint x="1780" y="380"/>
       </bpmndi:BPMNEdge>
 
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 
-</bpmn:definitions>
+</definitions>
