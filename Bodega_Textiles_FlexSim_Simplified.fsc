@@ -1,0 +1,220 @@
+// ====================================================================
+// FLEXSIM - BODEGA TEXTILES SIMPLIFIED SCRIPT
+// Compatible con múltiples versiones de FlexSim
+// Fecha: 12 de Noviembre de 2025
+// ====================================================================
+
+// ================== CONFIGURACIÓN INICIAL ==================
+// Limpiar modelo actual
+resetmodel();
+
+// ================== CREACIÓN DE RACKS ==================
+
+// 1. Crear Racks Tipo A (6 metros) - Almacenamiento masivo
+Object rack1 = createobject("Rack");
+setname(rack1, "Rack_6m_01");
+setsize(rack1, 6.0, 1.2, 4.0);
+setloc(rack1, 5, 12, 0);
+
+Object rack2 = createobject("Rack");
+setname(rack2, "Rack_6m_02");
+setsize(rack2, 6.0, 1.2, 4.0);
+setloc(rack2, 12, 12, 0);
+
+Object rack3 = createobject("Rack");
+setname(rack3, "Rack_6m_03");
+setsize(rack3, 6.0, 1.2, 4.0);
+setloc(rack3, 5, 10, 0);
+
+Object rack4 = createobject("Rack");
+setname(rack4, "Rack_6m_04");
+setsize(rack4, 6.0, 1.2, 4.0);
+setloc(rack4, 12, 10, 0);
+
+// 2. Crear Racks Tipo B (3 metros) - Hombre
+Object rackH1 = createobject("Rack");
+setname(rackH1, "Rack_3m_Hombre_01");
+setsize(rackH1, 3.0, 1.2, 3.5);
+setloc(rackH1, 3, 4, 0);
+
+Object rackH2 = createobject("Rack");
+setname(rackH2, "Rack_3m_Hombre_02");
+setsize(rackH2, 3.0, 1.2, 3.5);
+setloc(rackH2, 7, 4, 0);
+
+Object rackH3 = createobject("Rack");
+setname(rackH3, "Rack_3m_Hombre_03");
+setsize(rackH3, 3.0, 1.2, 3.5);
+setloc(rackH3, 11, 4, 0);
+
+Object rackH4 = createobject("Rack");
+setname(rackH4, "Rack_3m_Hombre_04");
+setsize(rackH4, 3.0, 1.2, 3.5);
+setloc(rackH4, 15, 4, 0);
+
+// 3. Crear Racks Tipo B (3 metros) - Mujer
+Object rackM1 = createobject("Rack");
+setname(rackM1, "Rack_3m_Mujer_01");
+setsize(rackM1, 3.0, 1.2, 3.5);
+setloc(rackM1, 19, 4, 0);
+
+Object rackM2 = createobject("Rack");
+setname(rackM2, "Rack_3m_Mujer_02");
+setsize(rackM2, 3.0, 1.2, 3.5);
+setloc(rackM2, 20.5, 4, 0);
+
+Object rackM3 = createobject("Rack");
+setname(rackM3, "Rack_3m_Mujer_03");
+setsize(rackM3, 3.0, 1.2, 3.5);
+setloc(rackM3, 22, 4, 0);
+
+Object rackM4 = createobject("Rack");
+setname(rackM4, "Rack_3m_Mujer_04");
+setsize(rackM4, 3.0, 1.2, 3.5);
+setloc(rackM4, 23.5, 4, 0);
+
+// 4. Crear Racks Tipo C (2 metros) - Picking rápido
+Object rackP1 = createobject("Rack");
+setname(rackP1, "Rack_2m_Picking_01");
+setsize(rackP1, 2.0, 1.0, 2.5);
+setloc(rackP1, 10, 7, 0);
+
+Object rackP2 = createobject("Rack");
+setname(rackP2, "Rack_2m_Picking_02");
+setsize(rackP2, 2.0, 1.0, 2.5);
+setloc(rackP2, 12.5, 9, 0);
+
+Object rackP3 = createobject("Rack");
+setname(rackP3, "Rack_2m_Picking_03");
+setsize(rackP3, 2.0, 1.0, 2.5);
+setloc(rackP3, 15, 7, 0);
+
+Object rackP4 = createobject("Rack");
+setname(rackP4, "Rack_2m_Picking_04");
+setsize(rackP4, 2.0, 1.0, 2.5);
+setloc(rackP4, 17.5, 9, 0);
+
+// ================== CREACIÓN DE ZONAS OPERATIVAS ==================
+
+// Zona Recepción
+Object zonaRecepcion = createobject("Queue");
+setname(zonaRecepcion, "Area_Recepcion");
+setsize(zonaRecepcion, 4.0, 3.0, 0.5);
+setloc(zonaRecepcion, 3, 2, 0);
+
+// Zona Packing Principal
+Object packingPrincipal = createobject("Queue");
+setname(packingPrincipal, "Area_Packing_Principal");
+setsize(packingPrincipal, 4.0, 3.0, 0.5);
+setloc(packingPrincipal, 8, 3, 0);
+
+// Zona Packing Alternativa
+Object packingAlternativa = createobject("Queue");
+setname(packingAlternativa, "Area_Packing_Alternativa");
+setsize(packingAlternativa, 3.0, 2.5, 0.5);
+setloc(packingAlternativa, 15, 4, 0);
+
+// Zona Merma
+Object zonaMerma = createobject("Queue");
+setname(zonaMerma, "Area_Merma");
+setsize(zonaMerma, 2.0, 1.5, 1.0);
+setloc(zonaMerma, 22, 12, 0);
+
+// ================== CREACIÓN DE EQUIPAMIENTO ==================
+
+// Apiladora Eléctrica
+Object stacker = createobject("Operator");
+setname(stacker, "Stacker_01");
+setsize(stacker, 1.2, 0.7, 2.0);
+setloc(stacker, 10, 8, 0);
+
+// Transpaleta 1
+Object transpaleta1 = createobject("Operator");
+setname(transpaleta1, "Transpaleta_01");
+setsize(transpaleta1, 1.5, 0.6, 1.2);
+setloc(transpaleta1, 5, 5, 0);
+
+// Transpaleta 2
+Object transpaleta2 = createobject("Operator");
+setname(transpaleta2, "Transpaleta_02");
+setsize(transpaleta2, 1.5, 0.6, 1.2);
+setloc(transpaleta2, 8, 5, 0);
+
+// ================== CONFIGURACIÓN DE FLUJOS ==================
+
+// Fuente de Recepción
+Object sourceRecepcion = createobject("Source");
+setname(sourceRecepcion, "Source_Recepcion");
+setloc(sourceRecepcion, 1, 1, 0);
+setsize(sourceRecepcion, 1, 1, 1);
+
+// Fuente de Pedidos
+Object sourcePedidos = createobject("Source");
+setname(sourcePedidos, "Source_Pedidos");
+setloc(sourcePedidos, 23, 1, 0);
+setsize(sourcePedidos, 1, 1, 1);
+
+// Procesador de Verificación
+Object processorVerificacion = createobject("Processor");
+setname(processorVerificacion, "Processor_Verificacion");
+setloc(processorVerificacion, 5, 3, 0);
+setsize(processorVerificacion, 1.5, 1.5, 1);
+
+// Procesador de Packing
+Object processorPacking = createobject("Processor");
+setname(processorPacking, "Processor_Packing");
+setloc(processorPacking, 10, 3, 0);
+setsize(processorPacking, 2, 2, 1);
+
+// Sink de Salida
+Object sinkSalida = createobject("Sink");
+setname(sinkSalida, "Sink_Salida");
+setloc(sinkSalida, 23, 13, 0);
+setsize(sinkSalida, 1.5, 1.5, 1);
+
+// ================== CONEXIONES BÁSICAS ==================
+
+// Conectar flujo principal de recepción
+contextdragconnection(sourceRecepcion, zonaRecepcion, "A");
+contextdragconnection(zonaRecepcion, processorVerificacion, "A");
+contextdragconnection(processorVerificacion, rack1, "A");
+
+// Conectar flujo de pedidos
+contextdragconnection(sourcePedidos, packingPrincipal, "A");
+contextdragconnection(packingPrincipal, processorPacking, "A");
+contextdragconnection(processorPacking, sinkSalida, "A");
+
+// ================== OBSTÁCULOS ==================
+
+// Sillones y mesa
+Object obstaculoSillones = createobject("FixedResource");
+setname(obstaculoSillones, "Obstaculo_Sillones");
+setsize(obstaculoSillones, 2.0, 1.5, 0.9);
+setloc(obstaculoSillones, 12, 7, 0);
+
+// Oficina/Baño
+Object obstaculoOficina = createobject("FixedResource");
+setname(obstaculoOficina, "Obstaculo_Oficina");
+setsize(obstaculoOficina, 2.0, 2.0, 2.5);
+setloc(obstaculoOficina, 20, 2, 0);
+
+// ================== FINALIZACIÓN ==================
+pt("Modelo de bodega textil creado exitosamente\n");
+pt("Total de racks: 12\n");
+pt("Zonas operativas: 4\n");
+pt("Equipamiento: 3 unidades\n");
+
+// ====================================================================
+// INSTRUCCIONES DE USO:
+// 1. Abrir FlexSim
+// 2. File > New Model
+// 3. Ctrl+E para abrir Script Editor
+// 4. Copiar y pegar este código
+// 5. Presionar botón verde "Run" o F5
+//
+// NOTA: Después de ejecutar, configure manualmente:
+// - Tiempos de proceso en cada Processor
+// - Intervalos de llegada en cada Source
+// - Capacidades en cada Queue
+// - Velocidades de Operators
+// ====================================================================
