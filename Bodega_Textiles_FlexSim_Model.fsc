@@ -1,0 +1,260 @@
+// ====================================================================
+// FLEXSIM - BODEGA TEXTILES COMPLETA MODELING SCRIPT
+// Basado en informe de análisis de bodega de 25m x 15m x 5m
+// Fecha: 6 de Noviembre de 2025
+// ====================================================================
+
+// ================== CONFIGURACIÓN INICIAL ==================
+model().reset(); // Resetear modelo existente
+setname(model(), "Bodega_Textiles_Simulation");
+
+// Configurar unidades a metros
+treenode units = model().find("Tools/ModelUnits");
+if (units) {
+    setnodenum(units.find("Length"), 1);
+    setnodenum(units.find("Speed"), 1);
+    setnodenum(units.find("Time"), 1);
+}
+
+// ================== CREACIÓN DE LAYOUT ==================
+
+// 1. Crear límites de la bodega
+Object bodega = createobject("FixedResource", model());
+setname(bodega, "Bodega_Boundary");
+setsize(bodega, 25, 15, 5);
+setloc(bodega, 12.5, 7.5, 0);
+setcolor(bodega, 100, 100, 100);
+
+// 2. Crear Racks Tipo A (6 metros)
+for (int i = 1; i <= 4; i++) {
+    Object rack = createobject("Rack", model());
+    string name = "Rack_6m_0" + string.fromNum(i);
+    setname(rack, name);
+    setsize(rack, 6.0, 1.2, 4.0);
+    rack.baycount = 4;
+    rack.levelcount = 4;
+    rack.baywidth = 1.5;
+    rack.levelheight = 1.0;
+    rack.maxcontent = 16;
+    setlabelstr(rack, "Tipo", "Almacenamiento_Masivo");
+
+    // Posicionar en fondo de bodega
+    if (i <= 2) {
+        setloc(rack, 5 + (i-1) * 7, 12, 0);
+    } else {
+        setloc(rack, 5 + (i-3) * 7, 10, 0);
+    }
+}
+
+// 3. Crear Racks Tipo B (3 metros) - Hombre
+for (int i = 1; i <= 4; i++) {
+    Object rack = createobject("Rack", model());
+    string name = "Rack_3m_Hombre_0" + string.fromNum(i);
+    setname(rack, name);
+    setsize(rack, 3.0, 1.2, 3.5);
+    rack.baycount = 3;
+    rack.levelcount = 3;
+    rack.baywidth = 1.0;
+    rack.levelheight = 1.17;
+    rack.maxcontent = 9;
+    setlabelstr(rack, "Genero", "Hombre");
+
+    // Posicionar en lado izquierdo
+    setloc(rack, 3 + (i-1) * 4, 4, 0);
+}
+
+// 4. Crear Racks Tipo B (3 metros) - Mujer
+for (int i = 1; i <= 4; i++) {
+    Object rack = createobject("Rack", model());
+    string name = "Rack_3m_Mujer_0" + string.fromNum(i);
+    setname(rack, name);
+    setsize(rack, 3.0, 1.2, 3.5);
+    rack.baycount = 3;
+    rack.levelcount = 3;
+    rack.baywidth = 1.0;
+    rack.levelheight = 1.17;
+    rack.maxcontent = 9;
+    setlabelstr(rack, "Genero", "Mujer");
+
+    // Posicionar en lado derecho
+    setloc(rack, 19 + (i-1) * 1.5, 4, 0);
+}
+
+// 5. Crear Racks Tipo C (2 metros) - Picking rápido
+for (int i = 1; i <= 4; i++) {
+    Object rack = createobject("Rack", model());
+    string name = "Rack_2m_Picking_0" + string.fromNum(i);
+    setname(rack, name);
+    setsize(rack, 2.0, 1.0, 2.5);
+    rack.baycount = 2;
+    rack.levelcount = 2;
+    rack.baywidth = 1.0;
+    rack.levelheight = 1.25;
+    rack.maxcontent = 4;
+    setlabelstr(rack, "Tipo", "Alta_Rotacion");
+
+    // Posicionar en zona central
+    double xPos = 10 + (i-1) * 2.5;
+    double yPos = (i % 2 == 1) ? 7 : 9;
+    setloc(rack, xPos, yPos, 0);
+}
+
+// 6. Crear Zonas Operativas
+
+// Zona Packing Principal
+Object packingPrincipal = createobject("Queue", model());
+setname(packingPrincipal, "Area_Packing_Principal");
+setsize(packingPrincipal, 4.0, 3.0, 0.5);
+setloc(packingPrincipal, 8, 3, 0);
+packingPrincipal.maxcontent = 8;
+setlabelstr(packingPrincipal, "Estado", "Siempre_Activo");
+
+// Zona Packing Alternativa
+Object packingAlternativa = createobject("Queue", model());
+setname(packingAlternativa, "Area_Packing_Alternativa");
+setsize(packingAlternativa, 3.0, 2.5, 0.5);
+setloc(packingAlternativa, 15, 4, 0);
+packingAlternativa.maxcontent = 6;
+setlabelstr(packingAlternativa, "Estado", "Flexible");
+
+// Zona Merma
+Object zonaMerma = createobject("Queue", model());
+setname(zonaMerma, "Area_Merma");
+setsize(zonaMerma, 2.0, 1.5, 1.0);
+setloc(zonaMerma, 22, 12, 0);
+zonaMerma.maxcontent = 30;
+setlabelnum(zonaMerma, "Priority", 1); // Máxima prioridad
+
+// Zona Recepción
+Object zonaRecepcion = createobject("Queue", model());
+setname(zonaRecepcion, "Area_Recepcion");
+setsize(zonaRecepcion, 4.0, 3.0, 0.5);
+setloc(zonaRecepcion, 3, 2, 0);
+zonaRecepcion.maxcontent = 5;
+
+// 7. Crear Obstáculos
+
+// Sillones y mesa
+Object obstaculoSillones = createobject("FixedResource", model());
+setname(obstaculoSillones, "Obstaculo_Sillones");
+setsize(obstaculoSillones, 2.0, 1.5, 0.9);
+setloc(obstaculoSillones, 12, 7, 0);
+setcolor(obstaculoSillones, 139, 69, 19);
+
+// Oficina/Baño
+Object obstaculoOficina = createobject("FixedResource", model());
+setname(obstaculoOficina, "Obstaculo_Oficina");
+setsize(obstaculoOficina, 2.0, 2.0, 2.5);
+setloc(obstaculoOficina, 20, 2, 0);
+setcolor(obstaculoOficina, 100, 100, 150);
+
+// ================== CREACIÓN DE EQUIPAMIENTO ==================
+
+// 1. Apiladora Eléctrica (Stacker)
+Object stacker = createobject("Operator", model());
+setname(stacker, "Stacker_01");
+setsize(stacker, 1.2, 0.7, 2.0);
+setloc(stacker, 10, 8, 0);
+stacker.maxspeed = 1.2; // m/s vacío
+stacker.travelemptytime = 1 / 1.2;
+stacker.travelloadedtime = 1 / 0.8; // m/s cargado
+setlabelstr(stacker, "Tipo", "Apiladora_Electrica");
+
+// 2. Transpaletas Manuales
+for (int i = 1; i <= 2; i++) {
+    Object transpaleta = createobject("Operator", model());
+    string name = "Transpaleta_0" + string.fromNum(i);
+    setname(transpaleta, name);
+    setsize(transpaleta, 1.5, 0.6, 1.2);
+    setloc(transpaleta, 5 + (i-1) * 3, 5, 0);
+    transpaleta.maxspeed = 1.0; // m/s vacío
+    transpaleta.travelemptytime = 1 / 1.0;
+    transpaleta.travelloadedtime = 1 / 0.6; // m/s cargado
+    setlabelstr(transpaleta, "Tipo", "Transpaleta_Manual");
+}
+
+// ================== CONFIGURACIÓN DE FLUJOS ==================
+
+// 1. Fuente de Recepción de Mercadería
+Object sourceRecepcion = createobject("Source", model());
+setname(sourceRecepcion, "Source_Recepcion");
+setloc(sourceRecepcion, 1, 1, 0);
+setsize(sourceRecepcion, 1, 1, 1);
+sourceRecepcion.interarrivaltime = "exponential(1800)"; // 30 min promedio en segundos
+sourceRecepcion.maxcontent = 999999;
+
+// 2. Fuente de Pedidos
+Object sourcePedidos = createobject("Source", model());
+setname(sourcePedidos, "Source_Pedidos");
+setloc(sourcePedidos, 23, 1, 0);
+setsize(sourcePedidos, 1, 1, 1);
+sourcePedidos.interarrivaltime = "exponential(2700)"; // 45 min promedio en segundos
+
+// 3. Procesador de Verificación
+Object processorVerificacion = createobject("Processor", model());
+setname(processorVerificacion, "Processor_Verificacion");
+setloc(processorVerificacion, 5, 3, 0);
+setsize(processorVerificacion, 1.5, 1.5, 1);
+processorVerificacion.processtime = "triangular(900, 1050, 1200)"; // 15-20 min en segundos
+
+// 4. Procesador de Packing
+Object processorPacking = createobject("Processor", model());
+setname(processorPacking, "Processor_Packing");
+setloc(processorPacking, 10, 3, 0);
+setsize(processorPacking, 2, 2, 1);
+processorPacking.processtime = "triangular(1800, 2250, 2700)"; // 30-45 min en segundos
+
+// 5. Sink de Salida
+Object sinkSalida = createobject("Sink", model());
+setname(sinkSalida, "Sink_Salida");
+setloc(sinkSalida, 23, 13, 0);
+setsize(sinkSalida, 1.5, 1.5, 1);
+
+// ================== CONEXIONES DE FLUJO ==================
+
+// Conectar Recepción
+contextdragconnection(sourceRecepcion, zonaRecepcion, "A");
+contextdragconnection(zonaRecepcion, processorVerificacion, "A");
+
+// Conectar Verificación a Racks (basado en tipo)
+contextdragconnection(processorVerificacion, model().find("Rack_6m_01"), "A");
+contextdragconnection(processorVerificacion, model().find("Rack_3m_Hombre_01"), "A");
+contextdragconnection(processorVerificacion, model().find("Rack_3m_Mujer_01"), "A");
+contextdragconnection(processorVerificacion, model().find("Rack_2m_Picking_01"), "A");
+
+// Conectar Pedidos
+contextdragconnection(sourcePedidos, packingPrincipal, "A");
+contextdragconnection(packingPrincipal, processorPacking, "A");
+contextdragconnection(processorPacking, sinkSalida, "A");
+
+// ================== VARIABLES GLOBALES ==================
+
+// Crear etiquetas globales para control
+model().labels.assert("OperadoresDisponibles");
+model().labels["OperadoresDisponibles"].value = 3;
+
+model().labels.assert("PedidosProcesados");
+model().labels["PedidosProcesados"].value = 0;
+
+model().labels.assert("ActivacionesZonaAlternativa");
+model().labels["ActivacionesZonaAlternativa"].value = 0;
+
+// ================== FINALIZACIÓN ==================
+
+// Centrar vista en modelo completo
+applicationcommand("zoom", "fit");
+
+// Mostrar mensajes de finalización
+msg("Modelo de bodega textil creado exitosamente", 0);
+msg("Capacidad total de almacenamiento: 180 pallets aproximadamente", 0);
+msg("Ajuste las conexiones y parámetros según sea necesario", 0);
+
+// ====================================================================
+// FIN DEL SCRIPT DE MODELADO COMPLETO
+// Para ejecutar:
+// 1. Abrir FlexSim
+// 2. Crear nuevo modelo (File > New Model)
+// 3. Abrir Script Console (View > Script Console o presionar F11)
+// 4. Copiar y pegar este script completo
+// 5. Presionar "Run" o F5
+// ====================================================================
