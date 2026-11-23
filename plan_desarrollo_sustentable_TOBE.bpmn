@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://www.omg.org/bpmn20"
+             id="Definitions_Buzines_TOBE_Sustentable">
+  <!-- PLAN DE DESARROLLO SUSTENTABLE (TO-BE): departamentos = pools, agentes = lanes -->
+  <!-- Basado en el diagnostico AS-IS proceso_buzines_lean.bpmn (mudas M1-M12) -->
+  <collaboration id="Collab_TOBE">
+    <participant id="P_Cliente" name="CLIENTE (externo)" processRef="Proc_Cliente"/>
+    <participant id="P_Ventas" name="VENTAS Y ATENCION AL CLIENTE" processRef="Proc_Ventas"/>
+    <participant id="P_Diseno" name="DISENO Y BORDADO" processRef="Proc_Diseno"/>
+    <participant id="P_Admin" name="ADMINISTRACION Y FINANZAS" processRef="Proc_Admin"/>
+    <participant id="P_Abast" name="ABASTECIMIENTO Y COMPRAS SUSTENTABLES [NUEVO]" processRef="Proc_Abast"/>
+    <participant id="P_Proveedor" name="PROVEEDORES CERTIFICADOS (externo)" processRef="Proc_Proveedor"/>
+    <participant id="P_Prod" name="PRODUCCION" processRef="Proc_Prod"/>
+    <participant id="P_Bodega" name="BODEGA Y LOGISTICA" processRef="Proc_Bodega"/>
+    <participant id="P_LogInv" name="LOGISTICA INVERSA Y GESTION DE RESIDUOS [NUEVO]" processRef="Proc_LogInv"/>
+    <participant id="P_Comite" name="GERENCIA Y COMITE DE SUSTENTABILIDAD [NUEVO]" processRef="Proc_Comite"/>
+    <messageFlow id="MF_01" name="Solicitud" sourceRef="Ev_Start" targetRef="T_RegistrarCRM"/>
+    <messageFlow id="MF_02" name="Brief estandarizado" sourceRef="T_Brief" targetRef="T_Disenar"/>
+    <messageFlow id="MF_03" name="Propuesta + ficha tecnica" sourceRef="T_FichaTec" targetRef="T_AprobarDis"/>
+    <messageFlow id="MF_04" name="Pago 50%" sourceRef="T_PagoIni" targetRef="T_RegistroUnico"/>
+    <messageFlow id="MF_05" name="Requerimiento materiales" sourceRef="T_RegistroUnico" targetRef="T_Kanban"/>
+    <messageFlow id="MF_06" name="OC sustentable" sourceRef="T_OCVerde" targetRef="T_EntregaProv"/>
+    <messageFlow id="MF_07" name="Materiales certificados" sourceRef="T_EntregaProv" targetRef="T_Recepcion"/>
+    <messageFlow id="MF_08" name="Kit completo" sourceRef="T_Kit" targetRef="T_Planificar"/>
+    <messageFlow id="MF_09" name="Muestra fisica" sourceRef="T_Muestra" targetRef="T_AprobarMue"/>
+    <messageFlow id="MF_10" name="Retazos y mermas" sourceRef="T_Serie" targetRef="T_Retazos"/>
+    <messageFlow id="MF_11" name="Producto conforme" sourceRef="T_Jidoka" targetRef="T_AlmacenarPT"/>
+    <messageFlow id="MF_12" name="Pago 50%" sourceRef="T_PagoFin" targetRef="T_Factura"/>
+    <messageFlow id="MF_13" name="Entrega" sourceRef="T_Despacho" targetRef="T_Recibir"/>
+    <messageFlow id="MF_14" name="Prendas usadas" sourceRef="T_Devolver" targetRef="T_RecibirDev"/>
+    <messageFlow id="MF_15" name="Kg valorizados" sourceRef="T_Valorizar" targetRef="T_KPI"/>
+    <messageFlow id="MF_16" name="Tablero KPI" sourceRef="T_KPI" targetRef="T_PDCA"/>
+    <textAnnotation id="Ann_Leyenda"><text>PLAN DE DESARROLLO - CADENA DE SUMINISTRO SUSTENTABLE (TO-BE)
+Pools = DEPARTAMENTOS | Lanes = AGENTES responsables
+[NUEVO] = departamento o agente creado por el plan de accion
+Cada actividad indica la muda del diagnostico AS-IS que resuelve (M1-M12)
+Plazos: Corto 0-6 meses | Mediano 6-18 meses | Largo 18-36 meses</text></textAnnotation>
+  </collaboration>
+  <process id="Proc_Cliente" name="CLIENTE (externo)" isExecutable="false">
+    <laneSet id="LS_Cliente">
+      <lane id="L_Cliente_Cliente" name="Cliente / Comprador corporativo">
+        <flowNodeRef>Ev_Start</flowNodeRef>
+        <flowNodeRef>T_AprobarDis</flowNodeRef>
+        <flowNodeRef>T_PagoIni</flowNodeRef>
+        <flowNodeRef>T_AprobarMue</flowNodeRef>
+        <flowNodeRef>T_PagoFin</flowNodeRef>
+        <flowNodeRef>T_Recibir</flowNodeRef>
+        <flowNodeRef>T_Devolver</flowNodeRef>
+        <flowNodeRef>Ev_EndCli</flowNodeRef>
+      </lane>
+    </laneSet>
+    <startEvent id="Ev_Start" name="Enviar solicitud de pedido">
+      <outgoing>SF_Ev_Start_T_AprobarDis</outgoing>
+    </startEvent>
+    <userTask id="T_AprobarDis" name="Aprobar diseno con checklist objetivo">
+      <incoming>SF_Ev_Start_T_AprobarDis</incoming>
+      <outgoing>SF_T_AprobarDis_T_PagoIni</outgoing>
+    </userTask>
+    <task id="T_PagoIni" name="Pagar 50% inicial">
+      <incoming>SF_T_AprobarDis_T_PagoIni</incoming>
+      <outgoing>SF_T_PagoIni_T_AprobarMue</outgoing>
+    </task>
+    <userTask id="T_AprobarMue" name="Aprobar muestra fisica">
+      <incoming>SF_T_PagoIni_T_AprobarMue</incoming>
+      <outgoing>SF_T_AprobarMue_T_PagoFin</outgoing>
+    </userTask>
+    <task id="T_PagoFin" name="Pagar 50% final">
+      <incoming>SF_T_AprobarMue_T_PagoFin</incoming>
+      <outgoing>SF_T_PagoFin_T_Recibir</outgoing>
+    </task>
+    <userTask id="T_Recibir" name="Recibir producto y firmar conformidad">
+      <incoming>SF_T_PagoFin_T_Recibir</incoming>
+      <outgoing>SF_T_Recibir_T_Devolver</outgoing>
+    </userTask>
+    <task id="T_Devolver" name="Devolver prendas en fin de vida (programa de retorno)">
+      <incoming>SF_T_Recibir_T_Devolver</incoming>
+      <outgoing>SF_T_Devolver_Ev_EndCli</outgoing>
+    </task>
+    <endEvent id="Ev_EndCli" name="Cliente satisfecho">
+      <incoming>SF_T_Devolver_Ev_EndCli</incoming>
+    </endEvent>
+    <sequenceFlow id="SF_Ev_Start_T_AprobarDis" sourceRef="Ev_Start" targetRef="T_AprobarDis"/>
+    <sequenceFlow id="SF_T_AprobarDis_T_PagoIni" sourceRef="T_AprobarDis" targetRef="T_PagoIni"/>
+    <sequenceFlow id="SF_T_PagoIni_T_AprobarMue" sourceRef="T_PagoIni" targetRef="T_AprobarMue"/>
+    <sequenceFlow id="SF_T_AprobarMue_T_PagoFin" sourceRef="T_AprobarMue" targetRef="T_PagoFin"/>
+    <sequenceFlow id="SF_T_PagoFin_T_Recibir" sourceRef="T_PagoFin" targetRef="T_Recibir"/>
+    <sequenceFlow id="SF_T_Recibir_T_Devolver" sourceRef="T_Recibir" targetRef="T_Devolver"/>
+    <sequenceFlow id="SF_T_Devolver_Ev_EndCli" sourceRef="T_Devolver" targetRef="Ev_EndCli"/>
+  </process>
+  <process id="Proc_Ventas" name="VENTAS Y ATENCION AL CLIENTE" isExecutable="false">
+    <laneSet id="LS_Ventas">
+      <lane id="L_Ventas_Ejecutivo" name="Ejecutivo comercial">
+        <flowNodeRef>T_RegistrarCRM</flowNodeRef>
+        <flowNodeRef>T_Cotizar</flowNodeRef>
+        <flowNodeRef>T_Brief</flowNodeRef>
+      </lane>
+    </laneSet>
+    <userTask id="T_RegistrarCRM" name="Registrar solicitud en CRM">
+      <outgoing>SF_T_RegistrarCRM_T_Cotizar</outgoing>
+    </userTask>
+    <serviceTask id="T_Cotizar" name="Cotizar con alternativas sustentables (telas recicladas/organicas)">
+      <incoming>SF_T_RegistrarCRM_T_Cotizar</incoming>
+      <outgoing>SF_T_Cotizar_T_Brief</outgoing>
+    </serviceTask>
+    <userTask id="T_Brief" name="Completar brief estandarizado (resuelve M11)">
+      <incoming>SF_T_Cotizar_T_Brief</incoming>
+    </userTask>
+    <sequenceFlow id="SF_T_RegistrarCRM_T_Cotizar" sourceRef="T_RegistrarCRM" targetRef="T_Cotizar"/>
+    <sequenceFlow id="SF_T_Cotizar_T_Brief" sourceRef="T_Cotizar" targetRef="T_Brief"/>
+  </process>
+  <process id="Proc_Diseno" name="DISENO Y BORDADO" isExecutable="false">
+    <laneSet id="LS_Diseno">
+      <lane id="L_Diseno_Disenador" name="Disenador grafico">
+        <flowNodeRef>T_Disenar</flowNodeRef>
+      </lane>
+      <lane id="L_Diseno_TecBordado" name="Tecnico de bordado">
+        <flowNodeRef>T_FichaTec</flowNodeRef>
+      </lane>
+    </laneSet>
+    <userTask id="T_Disenar" name="Disenar con banco de referencias">
+      <outgoing>SF_T_Disenar_T_FichaTec</outgoing>
+    </userTask>
+    <userTask id="T_FichaTec" name="Archivo de bordado + ficha tecnica digital (resuelve M1-M2)">
+      <incoming>SF_T_Disenar_T_FichaTec</incoming>
+    </userTask>
+    <sequenceFlow id="SF_T_Disenar_T_FichaTec" sourceRef="T_Disenar" targetRef="T_FichaTec"/>
+  </process>
+  <process id="Proc_Admin" name="ADMINISTRACION Y FINANZAS" isExecutable="false">
+    <laneSet id="LS_Admin">
+      <lane id="L_Admin_EncERP" name="Encargado ERP-WMS (registro unico)">
+        <flowNodeRef>T_RegistroUnico</flowNodeRef>
+        <flowNodeRef>T_Factura</flowNodeRef>
+      </lane>
+      <lane id="L_Admin_Analista" name="Analista de datos y KPI [NUEVO]">
+        <flowNodeRef>T_KPI</flowNodeRef>
+      </lane>
+    </laneSet>
+    <serviceTask id="T_RegistroUnico" name="Registro unico ERP-WMS y orden de produccion (resuelve M12)">
+      <outgoing>SF_T_RegistroUnico_T_Factura</outgoing>
+    </serviceTask>
+    <serviceTask id="T_Factura" name="Emitir factura electronica">
+      <incoming>SF_T_RegistroUnico_T_Factura</incoming>
+      <outgoing>SF_T_Factura_T_KPI</outgoing>
+    </serviceTask>
+    <serviceTask id="T_KPI" name="Consolidar tablero de KPI mensual">
+      <incoming>SF_T_Factura_T_KPI</incoming>
+    </serviceTask>
+    <sequenceFlow id="SF_T_RegistroUnico_T_Factura" sourceRef="T_RegistroUnico" targetRef="T_Factura"/>
+    <sequenceFlow id="SF_T_Factura_T_KPI" sourceRef="T_Factura" targetRef="T_KPI"/>
+  </process>
+  <process id="Proc_Abast" name="ABASTECIMIENTO Y COMPRAS SUSTENTABLES [NUEVO]" isExecutable="false">
+    <laneSet id="LS_Abast">
+      <lane id="L_Abast_Comprador" name="Comprador / Gestor de proveedores">
+        <flowNodeRef>T_Kanban</flowNodeRef>
+        <flowNodeRef>T_OCVerde</flowNodeRef>
+      </lane>
+    </laneSet>
+    <serviceTask id="T_Kanban" name="Verificar stock y reponer por Kanban (resuelve M6)">
+      <outgoing>SF_T_Kanban_T_OCVerde</outgoing>
+    </serviceTask>
+    <userTask id="T_OCVerde" name="Emitir OC a proveedor evaluado con criterios ESG">
+      <incoming>SF_T_Kanban_T_OCVerde</incoming>
+    </userTask>
+    <sequenceFlow id="SF_T_Kanban_T_OCVerde" sourceRef="T_Kanban" targetRef="T_OCVerde"/>
+  </process>
+  <process id="Proc_Proveedor" name="PROVEEDORES CERTIFICADOS (externo)" isExecutable="false">
+    <laneSet id="LS_Proveedor">
+      <lane id="L_Proveedor_ProvTelas" name="Proveedor de telas e insumos">
+        <flowNodeRef>T_EntregaProv</flowNodeRef>
+      </lane>
+    </laneSet>
+    <task id="T_EntregaProv" name="Entregar materiales certificados y embalaje retornable">
+    </task>
+  </process>
+  <process id="Proc_Prod" name="PRODUCCION" isExecutable="false">
+    <laneSet id="LS_Prod">
+      <lane id="L_Prod_JefeProd" name="Jefe de produccion">
+        <flowNodeRef>T_Planificar</flowNodeRef>
+      </lane>
+      <lane id="L_Prod_Operario" name="Operario de confeccion (celula)">
+        <flowNodeRef>T_Muestra</flowNodeRef>
+        <flowNodeRef>T_Serie</flowNodeRef>
+      </lane>
+      <lane id="L_Prod_Inspector" name="Inspector de calidad Jidoka">
+        <flowNodeRef>T_Jidoka</flowNodeRef>
+      </lane>
+    </laneSet>
+    <userTask id="T_Planificar" name="Planificar en celulas y transporte consolidado (resuelve M4)">
+      <outgoing>SF_T_Planificar_T_Muestra</outgoing>
+    </userTask>
+    <userTask id="T_Muestra" name="Elaborar muestra segun ficha tecnica">
+      <incoming>SF_T_Planificar_T_Muestra</incoming>
+      <outgoing>SF_T_Muestra_T_Serie</outgoing>
+    </userTask>
+    <userTask id="T_Serie" name="Confeccionar serie con SOP, 5S y Poka-Yoke (resuelve M8-M9)">
+      <incoming>SF_T_Muestra_T_Serie</incoming>
+      <outgoing>SF_T_Serie_T_Jidoka</outgoing>
+    </userTask>
+    <manualTask id="T_Jidoka" name="Control de calidad en linea Jidoka (resuelve M10)">
+      <incoming>SF_T_Serie_T_Jidoka</incoming>
+    </manualTask>
+    <sequenceFlow id="SF_T_Planificar_T_Muestra" sourceRef="T_Planificar" targetRef="T_Muestra"/>
+    <sequenceFlow id="SF_T_Muestra_T_Serie" sourceRef="T_Muestra" targetRef="T_Serie"/>
+    <sequenceFlow id="SF_T_Serie_T_Jidoka" sourceRef="T_Serie" targetRef="T_Jidoka"/>
+  </process>
+  <process id="Proc_Bodega" name="BODEGA Y LOGISTICA" isExecutable="false">
+    <laneSet id="LS_Bodega">
+      <lane id="L_Bodega_JefeBod" name="Jefe de bodega (WMS)">
+        <flowNodeRef>T_Recepcion</flowNodeRef>
+        <flowNodeRef>T_AlmacenarPT</flowNodeRef>
+      </lane>
+      <lane id="L_Bodega_OpBod" name="Operario de bodega / picking">
+        <flowNodeRef>T_Kit</flowNodeRef>
+        <flowNodeRef>T_Picking</flowNodeRef>
+      </lane>
+      <lane id="L_Bodega_Conductor" name="Conductor / Transporte">
+        <flowNodeRef>T_Despacho</flowNodeRef>
+      </lane>
+    </laneSet>
+    <serviceTask id="T_Recepcion" name="Recepcionar con codigo de barras y ubicar en WMS (resuelve M3-M5)">
+      <outgoing>SF_T_Recepcion_T_Kit</outgoing>
+    </serviceTask>
+    <manualTask id="T_Kit" name="Preparar kit de materiales por OP (kitting)">
+      <incoming>SF_T_Recepcion_T_Kit</incoming>
+      <outgoing>SF_T_Kit_T_AlmacenarPT</outgoing>
+    </manualTask>
+    <serviceTask id="T_AlmacenarPT" name="Almacenar producto terminado en ubicacion WMS">
+      <incoming>SF_T_Kit_T_AlmacenarPT</incoming>
+      <outgoing>SF_T_AlmacenarPT_T_Picking</outgoing>
+    </serviceTask>
+    <manualTask id="T_Picking" name="Picking por olas con ruta optimizada (resuelve M7)">
+      <incoming>SF_T_AlmacenarPT_T_Picking</incoming>
+      <outgoing>SF_T_Picking_T_Despacho</outgoing>
+    </manualTask>
+    <task id="T_Despacho" name="Despacho consolidado en ruta optimizada">
+      <incoming>SF_T_Picking_T_Despacho</incoming>
+    </task>
+    <sequenceFlow id="SF_T_Recepcion_T_Kit" sourceRef="T_Recepcion" targetRef="T_Kit"/>
+    <sequenceFlow id="SF_T_Kit_T_AlmacenarPT" sourceRef="T_Kit" targetRef="T_AlmacenarPT"/>
+    <sequenceFlow id="SF_T_AlmacenarPT_T_Picking" sourceRef="T_AlmacenarPT" targetRef="T_Picking"/>
+    <sequenceFlow id="SF_T_Picking_T_Despacho" sourceRef="T_Picking" targetRef="T_Despacho"/>
+  </process>
+  <process id="Proc_LogInv" name="LOGISTICA INVERSA Y GESTION DE RESIDUOS [NUEVO]" isExecutable="false">
+    <laneSet id="LS_LogInv">
+      <lane id="L_LogInv_EncReciclaje" name="Encargado de economia circular">
+        <flowNodeRef>T_Retazos</flowNodeRef>
+        <flowNodeRef>T_RecibirDev</flowNodeRef>
+      </lane>
+      <lane id="L_LogInv_GestorExt" name="Gestor externo de residuos (REP)">
+        <flowNodeRef>T_Valorizar</flowNodeRef>
+      </lane>
+    </laneSet>
+    <manualTask id="T_Retazos" name="Clasificar retazos y mermas por tipo de fibra">
+      <outgoing>SF_T_Retazos_T_RecibirDev</outgoing>
+    </manualTask>
+    <task id="T_RecibirDev" name="Recibir devoluciones y retazos">
+      <incoming>SF_T_Retazos_T_RecibirDev</incoming>
+      <outgoing>SF_T_RecibirDev_T_Valorizar</outgoing>
+    </task>
+    <task id="T_Valorizar" name="Reciclar / valorizar y emitir certificado de disposicion">
+      <incoming>SF_T_RecibirDev_T_Valorizar</incoming>
+    </task>
+    <sequenceFlow id="SF_T_Retazos_T_RecibirDev" sourceRef="T_Retazos" targetRef="T_RecibirDev"/>
+    <sequenceFlow id="SF_T_RecibirDev_T_Valorizar" sourceRef="T_RecibirDev" targetRef="T_Valorizar"/>
+  </process>
+  <process id="Proc_Comite" name="GERENCIA Y COMITE DE SUSTENTABILIDAD [NUEVO]" isExecutable="false">
+    <laneSet id="LS_Comite">
+      <lane id="L_Comite_Coordinador" name="Coordinador de sustentabilidad y mejora continua">
+        <flowNodeRef>T_PDCA</flowNodeRef>
+        <flowNodeRef>GW_Metas</flowNodeRef>
+        <flowNodeRef>T_Ajustar</flowNodeRef>
+      </lane>
+      <lane id="L_Comite_Gerente" name="Gerente general">
+        <flowNodeRef>T_Politica</flowNodeRef>
+        <flowNodeRef>Ev_EndCom</flowNodeRef>
+      </lane>
+    </laneSet>
+    <userTask id="T_PDCA" name="Revisar KPI y matriz de riesgo (ciclo PDCA)">
+      <outgoing>SF_T_PDCA_GW_Metas</outgoing>
+    </userTask>
+    <exclusiveGateway id="GW_Metas" name="Metas cumplidas?">
+      <incoming>SF_T_PDCA_GW_Metas</incoming>
+      <outgoing>SF_GW_Metas_T_Politica</outgoing>
+      <outgoing>SF_GW_Metas_T_Ajustar</outgoing>
+    </exclusiveGateway>
+    <userTask id="T_Ajustar" name="Ajustar plan de accion y reasignar tareas">
+      <incoming>SF_GW_Metas_T_Ajustar</incoming>
+      <outgoing>SF_T_Ajustar_T_Politica</outgoing>
+    </userTask>
+    <userTask id="T_Politica" name="Aprobar y difundir politica de sustentabilidad">
+      <incoming>SF_GW_Metas_T_Politica</incoming>
+      <incoming>SF_T_Ajustar_T_Politica</incoming>
+      <outgoing>SF_T_Politica_Ev_EndCom</outgoing>
+    </userTask>
+    <endEvent id="Ev_EndCom" name="Ciclo de mejora cerrado">
+      <incoming>SF_T_Politica_Ev_EndCom</incoming>
+    </endEvent>
+    <sequenceFlow id="SF_T_PDCA_GW_Metas" sourceRef="T_PDCA" targetRef="GW_Metas"/>
+    <sequenceFlow id="SF_GW_Metas_T_Politica" name="SI" sourceRef="GW_Metas" targetRef="T_Politica"/>
+    <sequenceFlow id="SF_GW_Metas_T_Ajustar" name="NO" sourceRef="GW_Metas" targetRef="T_Ajustar"/>
+    <sequenceFlow id="SF_T_Ajustar_T_Politica" sourceRef="T_Ajustar" targetRef="T_Politica"/>
+    <sequenceFlow id="SF_T_Politica_Ev_EndCom" sourceRef="T_Politica" targetRef="Ev_EndCom"/>
+  </process>
+  <bpmndi:BPMNDiagram id="Diag_TOBE">
+    <bpmndi:BPMNPlane id="Plane_TOBE" bpmnElement="Collab_TOBE">
+      <bpmndi:BPMNShape id="S_Ann_Leyenda" bpmnElement="Ann_Leyenda"><omgdc:Bounds x="80" y="80" width="700" height="200"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_P_Cliente" bpmnElement="P_Cliente" isHorizontal="true"><omgdc:Bounds x="80" y="330" width="5820" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Cliente_Cliente" bpmnElement="L_Cliente_Cliente" isHorizontal="true"><omgdc:Bounds x="110" y="330" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_P_Ventas" bpmnElement="P_Ventas" isHorizontal="true"><omgdc:Bounds x="80" y="480" width="5820" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Ventas_Ejecutivo" bpmnElement="L_Ventas_Ejecutivo" isHorizontal="true"><omgdc:Bounds x="110" y="480" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_P_Diseno" bpmnElement="P_Diseno" isHorizontal="true"><omgdc:Bounds x="80" y="630" width="5820" height="260"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Diseno_Disenador" bpmnElement="L_Diseno_Disenador" isHorizontal="true"><omgdc:Bounds x="110" y="630" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Diseno_TecBordado" bpmnElement="L_Diseno_TecBordado" isHorizontal="true"><omgdc:Bounds x="110" y="760" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_P_Admin" bpmnElement="P_Admin" isHorizontal="true"><omgdc:Bounds x="80" y="910" width="5820" height="260"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Admin_EncERP" bpmnElement="L_Admin_EncERP" isHorizontal="true"><omgdc:Bounds x="110" y="910" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Admin_Analista" bpmnElement="L_Admin_Analista" isHorizontal="true"><omgdc:Bounds x="110" y="1040" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_P_Abast" bpmnElement="P_Abast" isHorizontal="true"><omgdc:Bounds x="80" y="1190" width="5820" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Abast_Comprador" bpmnElement="L_Abast_Comprador" isHorizontal="true"><omgdc:Bounds x="110" y="1190" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_P_Proveedor" bpmnElement="P_Proveedor" isHorizontal="true"><omgdc:Bounds x="80" y="1340" width="5820" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Proveedor_ProvTelas" bpmnElement="L_Proveedor_ProvTelas" isHorizontal="true"><omgdc:Bounds x="110" y="1340" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_P_Prod" bpmnElement="P_Prod" isHorizontal="true"><omgdc:Bounds x="80" y="1490" width="5820" height="390"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Prod_JefeProd" bpmnElement="L_Prod_JefeProd" isHorizontal="true"><omgdc:Bounds x="110" y="1490" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Prod_Operario" bpmnElement="L_Prod_Operario" isHorizontal="true"><omgdc:Bounds x="110" y="1620" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Prod_Inspector" bpmnElement="L_Prod_Inspector" isHorizontal="true"><omgdc:Bounds x="110" y="1750" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_P_Bodega" bpmnElement="P_Bodega" isHorizontal="true"><omgdc:Bounds x="80" y="1900" width="5820" height="390"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Bodega_JefeBod" bpmnElement="L_Bodega_JefeBod" isHorizontal="true"><omgdc:Bounds x="110" y="1900" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Bodega_OpBod" bpmnElement="L_Bodega_OpBod" isHorizontal="true"><omgdc:Bounds x="110" y="2030" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Bodega_Conductor" bpmnElement="L_Bodega_Conductor" isHorizontal="true"><omgdc:Bounds x="110" y="2160" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_P_LogInv" bpmnElement="P_LogInv" isHorizontal="true"><omgdc:Bounds x="80" y="2310" width="5820" height="260"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_LogInv_EncReciclaje" bpmnElement="L_LogInv_EncReciclaje" isHorizontal="true"><omgdc:Bounds x="110" y="2310" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_LogInv_GestorExt" bpmnElement="L_LogInv_GestorExt" isHorizontal="true"><omgdc:Bounds x="110" y="2440" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_P_Comite" bpmnElement="P_Comite" isHorizontal="true"><omgdc:Bounds x="80" y="2590" width="5820" height="260"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Comite_Coordinador" bpmnElement="L_Comite_Coordinador" isHorizontal="true"><omgdc:Bounds x="110" y="2590" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_L_Comite_Gerente" bpmnElement="L_Comite_Gerente" isHorizontal="true"><omgdc:Bounds x="110" y="2720" width="5790" height="130"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Ev_Start" bpmnElement="Ev_Start"><omgdc:Bounds x="274" y="377" width="36" height="36"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_RegistrarCRM" bpmnElement="T_RegistrarCRM"><omgdc:Bounds x="395" y="505" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Cotizar" bpmnElement="T_Cotizar"><omgdc:Bounds x="560" y="505" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Brief" bpmnElement="T_Brief"><omgdc:Bounds x="725" y="505" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Disenar" bpmnElement="T_Disenar"><omgdc:Bounds x="890" y="655" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_FichaTec" bpmnElement="T_FichaTec"><omgdc:Bounds x="1055" y="785" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_AprobarDis" bpmnElement="T_AprobarDis"><omgdc:Bounds x="1220" y="355" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_PagoIni" bpmnElement="T_PagoIni"><omgdc:Bounds x="1385" y="355" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_RegistroUnico" bpmnElement="T_RegistroUnico"><omgdc:Bounds x="1550" y="935" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Kanban" bpmnElement="T_Kanban"><omgdc:Bounds x="1715" y="1215" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_OCVerde" bpmnElement="T_OCVerde"><omgdc:Bounds x="1880" y="1215" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_EntregaProv" bpmnElement="T_EntregaProv"><omgdc:Bounds x="2045" y="1365" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Recepcion" bpmnElement="T_Recepcion"><omgdc:Bounds x="2210" y="1925" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Kit" bpmnElement="T_Kit"><omgdc:Bounds x="2375" y="2055" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Planificar" bpmnElement="T_Planificar"><omgdc:Bounds x="2540" y="1515" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Muestra" bpmnElement="T_Muestra"><omgdc:Bounds x="2705" y="1645" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_AprobarMue" bpmnElement="T_AprobarMue"><omgdc:Bounds x="2870" y="355" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Serie" bpmnElement="T_Serie"><omgdc:Bounds x="3035" y="1645" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Jidoka" bpmnElement="T_Jidoka"><omgdc:Bounds x="3200" y="1775" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Retazos" bpmnElement="T_Retazos"><omgdc:Bounds x="3200" y="2335" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_AlmacenarPT" bpmnElement="T_AlmacenarPT"><omgdc:Bounds x="3365" y="1925" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_PagoFin" bpmnElement="T_PagoFin"><omgdc:Bounds x="3530" y="355" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Factura" bpmnElement="T_Factura"><omgdc:Bounds x="3695" y="935" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Picking" bpmnElement="T_Picking"><omgdc:Bounds x="3860" y="2055" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Despacho" bpmnElement="T_Despacho"><omgdc:Bounds x="4025" y="2185" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Recibir" bpmnElement="T_Recibir"><omgdc:Bounds x="4190" y="355" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Devolver" bpmnElement="T_Devolver"><omgdc:Bounds x="4355" y="355" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Ev_EndCli" bpmnElement="Ev_EndCli"><omgdc:Bounds x="4564" y="377" width="36" height="36"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_RecibirDev" bpmnElement="T_RecibirDev"><omgdc:Bounds x="4520" y="2335" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Valorizar" bpmnElement="T_Valorizar"><omgdc:Bounds x="4685" y="2465" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_KPI" bpmnElement="T_KPI"><omgdc:Bounds x="4850" y="1065" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_PDCA" bpmnElement="T_PDCA"><omgdc:Bounds x="5015" y="2615" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GW_Metas" bpmnElement="GW_Metas" isMarkerVisible="true"><omgdc:Bounds x="5218" y="2630" width="50" height="50"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Ajustar" bpmnElement="T_Ajustar"><omgdc:Bounds x="5345" y="2615" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_T_Politica" bpmnElement="T_Politica"><omgdc:Bounds x="5510" y="2745" width="125" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Ev_EndCom" bpmnElement="Ev_EndCom"><omgdc:Bounds x="5720" y="2767" width="36" height="36"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_SF_Ev_Start_T_AprobarDis" bpmnElement="SF_Ev_Start_T_AprobarDis">
+        <omgdi:waypoint x="310" y="395"/>
+        <omgdi:waypoint x="1220" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_AprobarDis_T_PagoIni" bpmnElement="SF_T_AprobarDis_T_PagoIni">
+        <omgdi:waypoint x="1345" y="395"/>
+        <omgdi:waypoint x="1385" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_PagoIni_T_AprobarMue" bpmnElement="SF_T_PagoIni_T_AprobarMue">
+        <omgdi:waypoint x="1510" y="395"/>
+        <omgdi:waypoint x="2870" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_AprobarMue_T_PagoFin" bpmnElement="SF_T_AprobarMue_T_PagoFin">
+        <omgdi:waypoint x="2995" y="395"/>
+        <omgdi:waypoint x="3530" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_PagoFin_T_Recibir" bpmnElement="SF_T_PagoFin_T_Recibir">
+        <omgdi:waypoint x="3655" y="395"/>
+        <omgdi:waypoint x="4190" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Recibir_T_Devolver" bpmnElement="SF_T_Recibir_T_Devolver">
+        <omgdi:waypoint x="4315" y="395"/>
+        <omgdi:waypoint x="4355" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Devolver_Ev_EndCli" bpmnElement="SF_T_Devolver_Ev_EndCli">
+        <omgdi:waypoint x="4480" y="395"/>
+        <omgdi:waypoint x="4564" y="395"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_RegistrarCRM_T_Cotizar" bpmnElement="SF_T_RegistrarCRM_T_Cotizar">
+        <omgdi:waypoint x="520" y="545"/>
+        <omgdi:waypoint x="560" y="545"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Cotizar_T_Brief" bpmnElement="SF_T_Cotizar_T_Brief">
+        <omgdi:waypoint x="685" y="545"/>
+        <omgdi:waypoint x="725" y="545"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Disenar_T_FichaTec" bpmnElement="SF_T_Disenar_T_FichaTec">
+        <omgdi:waypoint x="1015" y="695"/>
+        <omgdi:waypoint x="1030" y="695"/>
+        <omgdi:waypoint x="1030" y="825"/>
+        <omgdi:waypoint x="1055" y="825"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_RegistroUnico_T_Factura" bpmnElement="SF_T_RegistroUnico_T_Factura">
+        <omgdi:waypoint x="1675" y="975"/>
+        <omgdi:waypoint x="3695" y="975"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Factura_T_KPI" bpmnElement="SF_T_Factura_T_KPI">
+        <omgdi:waypoint x="3820" y="975"/>
+        <omgdi:waypoint x="3835" y="975"/>
+        <omgdi:waypoint x="3835" y="1105"/>
+        <omgdi:waypoint x="4850" y="1105"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Kanban_T_OCVerde" bpmnElement="SF_T_Kanban_T_OCVerde">
+        <omgdi:waypoint x="1840" y="1255"/>
+        <omgdi:waypoint x="1880" y="1255"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Recepcion_T_Kit" bpmnElement="SF_T_Recepcion_T_Kit">
+        <omgdi:waypoint x="2335" y="1965"/>
+        <omgdi:waypoint x="2350" y="1965"/>
+        <omgdi:waypoint x="2350" y="2095"/>
+        <omgdi:waypoint x="2375" y="2095"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Kit_T_AlmacenarPT" bpmnElement="SF_T_Kit_T_AlmacenarPT">
+        <omgdi:waypoint x="2500" y="2095"/>
+        <omgdi:waypoint x="2515" y="2095"/>
+        <omgdi:waypoint x="2515" y="1965"/>
+        <omgdi:waypoint x="3365" y="1965"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_AlmacenarPT_T_Picking" bpmnElement="SF_T_AlmacenarPT_T_Picking">
+        <omgdi:waypoint x="3490" y="1965"/>
+        <omgdi:waypoint x="3505" y="1965"/>
+        <omgdi:waypoint x="3505" y="2095"/>
+        <omgdi:waypoint x="3860" y="2095"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Picking_T_Despacho" bpmnElement="SF_T_Picking_T_Despacho">
+        <omgdi:waypoint x="3985" y="2095"/>
+        <omgdi:waypoint x="4000" y="2095"/>
+        <omgdi:waypoint x="4000" y="2225"/>
+        <omgdi:waypoint x="4025" y="2225"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Planificar_T_Muestra" bpmnElement="SF_T_Planificar_T_Muestra">
+        <omgdi:waypoint x="2665" y="1555"/>
+        <omgdi:waypoint x="2680" y="1555"/>
+        <omgdi:waypoint x="2680" y="1685"/>
+        <omgdi:waypoint x="2705" y="1685"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Muestra_T_Serie" bpmnElement="SF_T_Muestra_T_Serie">
+        <omgdi:waypoint x="2830" y="1685"/>
+        <omgdi:waypoint x="3035" y="1685"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Serie_T_Jidoka" bpmnElement="SF_T_Serie_T_Jidoka">
+        <omgdi:waypoint x="3160" y="1685"/>
+        <omgdi:waypoint x="3175" y="1685"/>
+        <omgdi:waypoint x="3175" y="1815"/>
+        <omgdi:waypoint x="3200" y="1815"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Retazos_T_RecibirDev" bpmnElement="SF_T_Retazos_T_RecibirDev">
+        <omgdi:waypoint x="3325" y="2375"/>
+        <omgdi:waypoint x="4520" y="2375"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_RecibirDev_T_Valorizar" bpmnElement="SF_T_RecibirDev_T_Valorizar">
+        <omgdi:waypoint x="4645" y="2375"/>
+        <omgdi:waypoint x="4660" y="2375"/>
+        <omgdi:waypoint x="4660" y="2505"/>
+        <omgdi:waypoint x="4685" y="2505"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_PDCA_GW_Metas" bpmnElement="SF_T_PDCA_GW_Metas">
+        <omgdi:waypoint x="5140" y="2655"/>
+        <omgdi:waypoint x="5218" y="2655"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_GW_Metas_T_Politica" bpmnElement="SF_GW_Metas_T_Politica">
+        <omgdi:waypoint x="5268" y="2655"/>
+        <omgdi:waypoint x="5282" y="2655"/>
+        <omgdi:waypoint x="5282" y="2785"/>
+        <omgdi:waypoint x="5510" y="2785"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_GW_Metas_T_Ajustar" bpmnElement="SF_GW_Metas_T_Ajustar">
+        <omgdi:waypoint x="5268" y="2655"/>
+        <omgdi:waypoint x="5345" y="2655"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Ajustar_T_Politica" bpmnElement="SF_T_Ajustar_T_Politica">
+        <omgdi:waypoint x="5470" y="2655"/>
+        <omgdi:waypoint x="5485" y="2655"/>
+        <omgdi:waypoint x="5485" y="2785"/>
+        <omgdi:waypoint x="5510" y="2785"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_T_Politica_Ev_EndCom" bpmnElement="SF_T_Politica_Ev_EndCom">
+        <omgdi:waypoint x="5635" y="2785"/>
+        <omgdi:waypoint x="5720" y="2785"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_01" bpmnElement="MF_01">
+        <omgdi:waypoint x="292" y="413"/>
+        <omgdi:waypoint x="292" y="490"/>
+        <omgdi:waypoint x="458" y="490"/>
+        <omgdi:waypoint x="458" y="505"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_02" bpmnElement="MF_02">
+        <omgdi:waypoint x="788" y="585"/>
+        <omgdi:waypoint x="788" y="640"/>
+        <omgdi:waypoint x="952" y="640"/>
+        <omgdi:waypoint x="952" y="655"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_03" bpmnElement="MF_03">
+        <omgdi:waypoint x="1118" y="785"/>
+        <omgdi:waypoint x="1118" y="450"/>
+        <omgdi:waypoint x="1282" y="450"/>
+        <omgdi:waypoint x="1282" y="435"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_04" bpmnElement="MF_04">
+        <omgdi:waypoint x="1448" y="435"/>
+        <omgdi:waypoint x="1448" y="920"/>
+        <omgdi:waypoint x="1612" y="920"/>
+        <omgdi:waypoint x="1612" y="935"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_05" bpmnElement="MF_05">
+        <omgdi:waypoint x="1612" y="1015"/>
+        <omgdi:waypoint x="1612" y="1200"/>
+        <omgdi:waypoint x="1778" y="1200"/>
+        <omgdi:waypoint x="1778" y="1215"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_06" bpmnElement="MF_06">
+        <omgdi:waypoint x="1942" y="1295"/>
+        <omgdi:waypoint x="1942" y="1350"/>
+        <omgdi:waypoint x="2108" y="1350"/>
+        <omgdi:waypoint x="2108" y="1365"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_07" bpmnElement="MF_07">
+        <omgdi:waypoint x="2108" y="1445"/>
+        <omgdi:waypoint x="2108" y="1910"/>
+        <omgdi:waypoint x="2272" y="1910"/>
+        <omgdi:waypoint x="2272" y="1925"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_08" bpmnElement="MF_08">
+        <omgdi:waypoint x="2438" y="2055"/>
+        <omgdi:waypoint x="2438" y="1610"/>
+        <omgdi:waypoint x="2602" y="1610"/>
+        <omgdi:waypoint x="2602" y="1595"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_09" bpmnElement="MF_09">
+        <omgdi:waypoint x="2768" y="1645"/>
+        <omgdi:waypoint x="2768" y="450"/>
+        <omgdi:waypoint x="2932" y="450"/>
+        <omgdi:waypoint x="2932" y="435"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_10" bpmnElement="MF_10">
+        <omgdi:waypoint x="3098" y="1725"/>
+        <omgdi:waypoint x="3098" y="2320"/>
+        <omgdi:waypoint x="3262" y="2320"/>
+        <omgdi:waypoint x="3262" y="2335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_11" bpmnElement="MF_11">
+        <omgdi:waypoint x="3262" y="1855"/>
+        <omgdi:waypoint x="3262" y="1910"/>
+        <omgdi:waypoint x="3428" y="1910"/>
+        <omgdi:waypoint x="3428" y="1925"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_12" bpmnElement="MF_12">
+        <omgdi:waypoint x="3592" y="435"/>
+        <omgdi:waypoint x="3592" y="920"/>
+        <omgdi:waypoint x="3758" y="920"/>
+        <omgdi:waypoint x="3758" y="935"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_13" bpmnElement="MF_13">
+        <omgdi:waypoint x="4088" y="2185"/>
+        <omgdi:waypoint x="4088" y="450"/>
+        <omgdi:waypoint x="4252" y="450"/>
+        <omgdi:waypoint x="4252" y="435"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_14" bpmnElement="MF_14">
+        <omgdi:waypoint x="4418" y="435"/>
+        <omgdi:waypoint x="4418" y="2320"/>
+        <omgdi:waypoint x="4582" y="2320"/>
+        <omgdi:waypoint x="4582" y="2335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_15" bpmnElement="MF_15">
+        <omgdi:waypoint x="4748" y="2465"/>
+        <omgdi:waypoint x="4748" y="1160"/>
+        <omgdi:waypoint x="4912" y="1160"/>
+        <omgdi:waypoint x="4912" y="1145"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_16" bpmnElement="MF_16">
+        <omgdi:waypoint x="4912" y="1145"/>
+        <omgdi:waypoint x="4912" y="2600"/>
+        <omgdi:waypoint x="5078" y="2600"/>
+        <omgdi:waypoint x="5078" y="2615"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
